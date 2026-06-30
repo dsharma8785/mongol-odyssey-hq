@@ -1739,6 +1739,11 @@ function showToast(msg){
 }
 
 function init(){
+  if(!riders.length){
+    const DEFAULT_RIDERS=["Deepak Sharma","Swapnil Varma","Nikhil Rao","Soumya Chatterjee","Kailash"];
+    for(let i=0;i<DEFAULT_RIDERS.length;i++)riders.push({name:DEFAULT_RIDERS[i],pts:0});
+    save();
+  }
   buildTape();renderHero();loadForm();renderRouteList();renderMemoirEntries();
   buildSymGrid();buildSpares();buildPhrases();renderStats();
   renderInsights();renderDayRatings();buildFuelStops();
