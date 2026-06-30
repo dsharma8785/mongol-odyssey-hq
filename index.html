@@ -10,8 +10,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="⚡ Mongol Odyssey HQ">
 <meta property="og:description" content="Offline-first ride log for the Mongol Odyssey — weather, AI morning briefs, photo/voice logging, and automatic Google Drive backup for all 6 riders.">
-<meta property="og:image" content="https://dsharma8785.github.io/mongol-odyssey-hq/social-preview.png">
-<meta property="og:url" content="https://dsharma8785.github.io/mongol-odyssey-hq/">
+<meta property="og:image" content="https://REPLACE-WITH-USERNAME.github.io/REPLACE-WITH-REPO/social-preview.png">
+<meta property="og:url" content="https://REPLACE-WITH-USERNAME.github.io/REPLACE-WITH-REPO/">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
@@ -19,7 +19,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="⚡ Mongol Odyssey HQ">
 <meta name="twitter:description" content="Offline-first ride log for the Mongol Odyssey — weather, AI morning briefs, photo/voice logging, and automatic Google Drive backup for all 6 riders.">
-<meta name="twitter:image" content="https://dsharma8785.github.io/mongol-odyssey-hq/social-preview.png">
+<meta name="twitter:image" content="https://REPLACE-WITH-USERNAME.github.io/REPLACE-WITH-REPO/social-preview.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -171,6 +171,7 @@ select option{background:var(--deep);}
 .pen{font-size:10px;color:var(--mist);margin-bottom:2px;}
 .pmn{font-size:12px;font-weight:600;color:var(--sand);}
 .pph{font-family:'Courier Prime',monospace;font-size:10px;color:var(--ember);margin-top:1px;}
+.phi{font-size:13px;color:var(--sand);margin-top:2px;}
 .igrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px;}
 .icard{background:var(--deep);border:1px solid var(--border);border-radius:9px;padding:11px;}
 .ititle{font-size:10px;color:var(--mist);margin-bottom:3px;font-family:'Courier Prime',monospace;}
@@ -1262,44 +1263,44 @@ function buildSpares(){
 
 const PHRASES=[
   {cat:"Navigation",ph:[
-    {e:"Where is petrol station?",m:"Бензин хаана байна?",p:"Ben-zin kha-na BAY-na?"},
-    {e:"How far to next town?",m:"Хэд километр вэ?",p:"Hed kilo-metr ve?"},
-    {e:"We are lost",m:"Бид төөрчихлөө",p:"Bid toe-ri-kh-LOO"},
-    {e:"Is road ahead bad?",m:"Урдаа зам муу юу?",p:"Or-da zam moo yoo?"},
-    {e:"Which direction?",m:"Аль зам вэ?",p:"Al zam ve?"},
-    {e:"Can you help us?",m:"Та бидэнд туслах уу?",p:"Ta bi-dend toos-lakh oo?"}
+    {e:"Where is petrol station?",m:"Бензин хаана байна?",p:"Ben-zin kha-na BAY-na?",h:"बेन-ज़िन खा-ना बाय-ना?"},
+    {e:"How far to next town?",m:"Хэд километр вэ?",p:"Hed kilo-metr ve?",h:"हेद किलो-मेत्र वे?"},
+    {e:"We are lost",m:"Бид төөрчихлөө",p:"Bid toe-ri-kh-LOO",h:"बिद तो-रिख़-लू"},
+    {e:"Is road ahead bad?",m:"Урдаа зам муу юу?",p:"Or-da zam moo yoo?",h:"ओर-दा ज़म मू यू?"},
+    {e:"Which direction?",m:"Аль зам вэ?",p:"Al zam ve?",h:"अल ज़म वे?"},
+    {e:"Can you help us?",m:"Та бидэнд туслах уу?",p:"Ta bi-dend toos-lakh oo?",h:"ता बि-देंद तूस-लख़ ऊ?"}
   ]},
   {cat:"Fuel and Repair",ph:[
-    {e:"Fill it up",m:"Дүүргэж өгнө үү",p:"Du-rgej ognu u"},
-    {e:"Petrol / Diesel",m:"Бензин / Дизель",p:"Ben-zin / Di-zel"},
-    {e:"Is there a mechanic?",m:"Механик байна уу?",p:"Me-khan-ik bay-na oo?"},
-    {e:"My bike is broken",m:"Мотоцикл эвдэрлээ",p:"Moto-tsikl ev-der-lee"},
-    {e:"I need water",m:"Надад ус хэрэгтэй",p:"Na-dad us khe-reg-tey"},
-    {e:"How much cost?",m:"Хэд вэ?",p:"Hed ve?"}
+    {e:"Fill it up",m:"Дүүргэж өгнө үү",p:"Du-rgej ognu u",h:"दू-र्गेज़ ओग्नु ऊ"},
+    {e:"Petrol / Diesel",m:"Бензин / Дизель",p:"Ben-zin / Di-zel",h:"बेन-ज़िन / दी-ज़ेल"},
+    {e:"Is there a mechanic?",m:"Механик байна уу?",p:"Me-khan-ik bay-na oo?",h:"मे-ख़ा-निक बाय-ना ऊ?"},
+    {e:"My bike is broken",m:"Мотоцикл эвдэрлээ",p:"Moto-tsikl ev-der-lee",h:"मोटो-त्सिक्ल एव-देर-ली"},
+    {e:"I need water",m:"Надад ус хэрэгтэй",p:"Na-dad us khe-reg-tey",h:"ना-दद उस खे-रेग-तेय"},
+    {e:"How much cost?",m:"Хэд вэ?",p:"Hed ve?",h:"हेद वे?"}
   ]},
   {cat:"Camp and Food",ph:[
-    {e:"Can we camp here?",m:"Энд байрлаж болох уу?",p:"End bayr-laj bo-lokh oo?"},
-    {e:"Is there a ger camp?",m:"Гэрийн бааз байна уу?",p:"Ge-riin baaz bay-na oo?"},
-    {e:"Thank you very much",m:"Баярлалаа",p:"Ba-yar-la-LAA"},
-    {e:"Delicious!",m:"Амттай!",p:"Am-TTAI!"},
-    {e:"Do you have food?",m:"Хоол байна уу?",p:"Khool bay-na oo?"},
-    {e:"Vegetarian food?",m:"Махгүй хоол байна уу?",p:"Makh-gui khool bay-na oo?"}
+    {e:"Can we camp here?",m:"Энд байрлаж болох уу?",p:"End bayr-laj bo-lokh oo?",h:"एंद बायर-लज बो-लख़ ऊ?"},
+    {e:"Is there a ger camp?",m:"Гэрийн бааз байна уу?",p:"Ge-riin baaz bay-na oo?",h:"गे-रीन बाज़ बाय-ना ऊ?"},
+    {e:"Thank you very much",m:"Баярлалаа",p:"Ba-yar-la-LAA",h:"बा-यर-ल-ला"},
+    {e:"Delicious!",m:"Амттай!",p:"Am-TTAI!",h:"अम-त्ताय!"},
+    {e:"Do you have food?",m:"Хоол байна уу?",p:"Khool bay-na oo?",h:"ख़ूल बाय-ना ऊ?"},
+    {e:"Vegetarian food?",m:"Махгүй хоол байна уу?",p:"Makh-gui khool bay-na oo?",h:"मख़-गुई ख़ूल बाय-ना ऊ?"}
   ]},
   {cat:"Emergency",ph:[
-    {e:"Help! Emergency!",m:"Тусалаарай! Яаралтай!",p:"Too-sa-LAA-rai! Ya-ral-tai!"},
-    {e:"Need doctor",m:"Эмч хэрэгтэй",p:"Emch khe-reg-tey"},
-    {e:"Call 103",m:"103 дугаар залгаарай",p:"103 dug-aar zal-GAA-rai"},
-    {e:"Accident happened",m:"Осол гарлаа",p:"O-sol gar-LAA"},
-    {e:"I am injured",m:"Би гэмтсэн",p:"Bi gem-tsen"},
-    {e:"Where is hospital?",m:"Эмнэлэг хаана?",p:"Em-ne-leg kha-na?"}
+    {e:"Help! Emergency!",m:"Тусалаарай! Яаралтай!",p:"Too-sa-LAA-rai! Ya-ral-tai!",h:"तू-स-ला-राय! य-रल-ताय!"},
+    {e:"Need doctor",m:"Эмч хэрэгтэй",p:"Emch khe-reg-tey",h:"एम्च खे-रेग-तेय"},
+    {e:"Call 103",m:"103 дугаар залгаарай",p:"103 dug-aar zal-GAA-rai",h:"103 दुग-आर ज़ल-गा-राय"},
+    {e:"Accident happened",m:"Осол гарлаа",p:"O-sol gar-LAA",h:"ओ-सोल गर-ला"},
+    {e:"I am injured",m:"Би гэмтсэн",p:"Bi gem-tsen",h:"बि गेम-त्सेन"},
+    {e:"Where is hospital?",m:"Эмнэлэг хаана?",p:"Em-ne-leg kha-na?",h:"एम-ने-लेग खा-ना?"}
   ]},
   {cat:"Friendly",ph:[
-    {e:"Hello!",m:"Сайн уу?",p:"Sayn oo?"},
-    {e:"My name is...",m:"Миний нэр...",p:"Mi-nii ner..."},
-    {e:"Beautiful country!",m:"Сайхан улс!",p:"Say-khan uls!"},
-    {e:"We love Mongolia",m:"Монголыг дуртай",p:"Mon-go-lyg doo-rtai"},
-    {e:"You are very kind",m:"Маш сайхан хүн",p:"Mash say-khan khun"},
-    {e:"Goodbye",m:"Баяртай",p:"Ba-yar-TAI"}
+    {e:"Hello!",m:"Сайн уу?",p:"Sayn oo?",h:"सायन ऊ?"},
+    {e:"My name is...",m:"Миний нэр...",p:"Mi-nii ner...",h:"मि-नी नेर..."},
+    {e:"Beautiful country!",m:"Сайхан улс!",p:"Say-khan uls!",h:"सय-ख़न उल्स!"},
+    {e:"We love Mongolia",m:"Монголыг дуртай",p:"Mon-go-lyg doo-rtai",h:"मोन-गो-ल्यग दू-र्ताय"},
+    {e:"You are very kind",m:"Маш сайхан хүн",p:"Mash say-khan khun",h:"मश सय-ख़न खुन"},
+    {e:"Goodbye",m:"Баяртай",p:"Ba-yar-TAI",h:"बा-यर-ताय"}
   ]}
 ];
 function buildPhrases(){
@@ -1312,7 +1313,7 @@ function buildPhrases(){
   const list=PHRASES[activePC].ph;
   for(let i=0;i<list.length;i++){
     const p=list[i];
-    html+="<div class=\"pcard\" onclick=\"copyP("+activePC+","+i+",this)\"><div class=\"pen\">"+p.e+"</div><div class=\"pmn\">"+p.m+"</div><div class=\"pph\">"+p.p+"</div></div>";
+    html+="<div class=\"pcard\" onclick=\"copyP("+activePC+","+i+",this)\"><div class=\"pen\">"+p.e+"</div><div class=\"pmn\">"+p.m+"</div><div class=\"pph\">"+p.p+"</div><div class=\"phi\">"+p.h+"</div></div>";
   }
   html+="</div>";
   document.getElementById("pcontent").innerHTML=html;
@@ -1329,7 +1330,7 @@ function genPhrase(){
   const input=document.getElementById("phraseIn").value;
   if(!input.trim()){showToast("Describe what to say");return;}
   let prompt="Translate for a motorcycle rider in rural Mongolia: \""+input+"\". ";
-  prompt+="Provide: 1 Mongolian Cyrillic, 2 phonetic pronunciation simple no special characters, 3 one usage tip. Exactly 3 lines.";
+  prompt+="Provide exactly 4 lines: 1 Mongolian Cyrillic, 2 phonetic pronunciation simple no special characters, 3 pronunciation written in Hindi Devanagari syllables, 4 one usage tip.";
   const out=document.getElementById("phraseOut");
   out.innerHTML="<div style=\"font-size:11px;color:var(--mist);\">Translating...</div>";
   callAI(prompt,null,out).then(function(txt){
