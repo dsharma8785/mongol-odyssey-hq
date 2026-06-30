@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mongol Odyssey HQ v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#080C18;--deep:#0E1428;--card:#131929;--border:#1E2A42;
+  --sand:#C8A96E;--sand-dim:#7A6340;--ember:#E8622A;
+  --steppe:#4A6741;--snow:#F0EBE0;--mist:#8A95A8;
+  --danger:#D94040;--warn:#D4A017;--purple:#7C5CBF;--teal:#2A8A8A;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--night);color:var(--snow);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
+.app-header{background:linear-gradient(180deg,#050810,var(--deep));border-bottom:1px solid var(--border);padding:0 16px;position:sticky;top:0;z-index:200;}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;gap:8px;}
+.brand-eyebrow{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:3px;color:var(--sand-dim);text-transform:uppercase;}
+.brand-name{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--sand);letter-spacing:1px;line-height:1;}
+.header-right{display:flex;align-items:center;gap:6px;}
+.online-pill{display:flex;align-items:center;gap:4px;font-size:10px;padding:3px 8px;border-radius:12px;border:1px solid var(--border);font-family:'Courier Prime',monospace;}
+.online-pill.live{color:#6DBF6A;border-color:rgba(74,103,65,.4);}
+.online-pill.offline{color:var(--danger);border-color:rgba(217,64,64,.4);}
+.odot{width:6px;height:6px;border-radius:50%;}
+.live .odot{background:#6DBF6A;animation:pulse 2s infinite;}
+.offline .odot{background:var(--danger);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.wchip{font-size:11px;color:var(--snow);background:rgba(255,255,255,.06);padding:4px 9px;border-radius:16px;border:1px solid var(--border);cursor:pointer;}
+.mode-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 5px;border-top:1px solid var(--border);}
+.mode-label{font-size:11px;color:var(--mist);}
+.mode-toggle{display:flex;border-radius:18px;border:1px solid var(--border);overflow:hidden;}
+.mbtn{padding:4px 11px;border:none;background:transparent;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--mist);}
+.mbtn.morning.on{background:rgba(212,160,23,.2);color:#D4A017;}
+.mbtn.evening.on{background:rgba(92,59,138,.25);color:#B89EE8;}
+.tape-wrap{overflow-x:auto;padding:7px 0 8px;scrollbar-width:none;}
+.tape-wrap::-webkit-scrollbar{display:none;}
+.tape{display:flex;gap:5px;width:max-content;}
+.dchip{display:flex;flex-direction:column;align-items:center;min-width:46px;padding:5px 5px;border-radius:7px;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;gap:1px;position:relative;}
+.dchip:hover{border-color:var(--sand-dim);}
+.dchip.active{border-color:var(--sand);background:#1C2540;}
+.dchip.logged{border-color:var(--steppe);}
+.dchip.hasphotos::after{content:"📷";position:absolute;top:-5px;right:-4px;font-size:9px;}
+.cnum{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;color:var(--mist);line-height:1;}
+.dchip.active .cnum{color:var(--sand);}
+.dchip.logged .cnum{color:#6DBF6A;}
+.ckm{font-family:'Courier Prime',monospace;font-size:8px;color:var(--sand-dim);}
+.cicon{font-size:11px;line-height:1;}
+.tabs{display:flex;gap:1px;padding:8px 16px 0;border-bottom:1px solid var(--border);background:var(--deep);overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tbtn{padding:6px 10px;border:none;background:transparent;color:var(--mist);font-family:'Inter',sans-serif;font-size:11px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .2s;}
+.tbtn:hover{color:var(--snow);}
+.tbtn.active{color:var(--sand);border-bottom-color:var(--sand);}
+.main{padding:14px 16px 100px;max-width:860px;margin:0 auto;}
+.panel{display:none;}.panel.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:10px;}
+.slabel{font-family:'Courier Prime',monospace;font-size:10px;letter-spacing:2px;color:var(--sand-dim);text-transform:uppercase;margin-bottom:7px;margin-top:14px;}
+.offline-note{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--mist);background:rgba(138,149,168,.07);border:1px solid var(--border);border-radius:6px;padding:3px 8px;margin-bottom:8px;}
+.needs-net{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--warn);background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.2);border-radius:7px;padding:6px 10px;margin-bottom:8px;}
+.mpanel{display:none;}.mpanel.active{display:block;}
+.epanel{display:none;}.epanel.active{display:block;}
+.hero{background:linear-gradient(135deg,var(--card),#0D1830);border:1px solid var(--border);border-radius:11px;padding:14px;margin-bottom:10px;position:relative;overflow:hidden;}
+.hero::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--ember),var(--sand),var(--steppe));}
+.hlabel{font-family:'Courier Prime',monospace;font-size:9px;letter-spacing:2px;color:var(--ember);text-transform:uppercase;margin-bottom:2px;}
+.htitle{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--snow);line-height:1.1;}
+.hbadges{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:16px;font-size:10px;font-weight:500;font-family:'Courier Prime',monospace;}
+.bkm{background:rgba(200,169,110,.12);color:var(--sand);border:1px solid rgba(200,169,110,.25);}
+.bterr{background:rgba(74,103,65,.15);color:#7DBF7A;border:1px solid rgba(74,103,65,.3);}
+.bwarn{background:rgba(232,98,42,.1);color:var(--ember);border:1px solid rgba(232,98,42,.2);}
+.hdesc{font-size:12px;color:var(--mist);line-height:1.65;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.fgroup{display:flex;flex-direction:column;gap:3px;}
+label{font-size:11px;font-weight:500;color:var(--mist);}
+input,textarea,select{background:var(--deep);border:1px solid var(--border);border-radius:7px;color:var(--snow);font-family:'Inter',sans-serif;font-size:13px;padding:8px 10px;width:100%;outline:none;transition:border-color .2s;}
+input:focus,textarea:focus,select:focus{border-color:var(--sand-dim);}
+textarea{resize:vertical;min-height:65px;}
+select option{background:var(--deep);}
+.star-row{display:flex;gap:4px;}
+.sbtn{background:none;border:none;font-size:20px;cursor:pointer;opacity:.25;color:var(--sand);}
+.sbtn.on{opacity:1;}
+.mood-row{display:flex;gap:5px;flex-wrap:wrap;}
+.mbtn2{background:var(--deep);border:1px solid var(--border);border-radius:7px;padding:6px 9px;cursor:pointer;font-size:16px;transition:all .2s;}
+.mbtn2.on{border-color:var(--sand);background:rgba(200,169,110,.1);}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border-radius:8px;border:none;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.bp{background:var(--ember);color:white;}.bp:hover{background:#D45520;}
+.bg{background:transparent;color:var(--mist);border:1px solid var(--border);}.bg:hover{border-color:var(--sand-dim);color:var(--snow);}
+.bs{background:rgba(200,169,110,.15);color:var(--sand);border:1px solid rgba(200,169,110,.3);}.bs:hover{background:rgba(200,169,110,.25);}
+.bm{background:rgba(212,160,23,.15);color:#D4A017;border:1px solid rgba(212,160,23,.3);}
+.be{background:rgba(92,59,138,.2);color:#B89EE8;border:1px solid rgba(92,59,138,.35);}
+.bd{background:rgba(217,64,64,.15);color:var(--danger);border:1px solid rgba(217,64,64,.3);}
+.brow{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
+.aibox{background:linear-gradient(135deg,rgba(14,20,40,.95),rgba(20,15,30,.95));border:1px solid rgba(200,169,110,.2);border-radius:11px;padding:14px;position:relative;overflow:hidden;margin-top:4px;}
+.aibox::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--sand),transparent);}
+.aihdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;flex-wrap:wrap;gap:5px;}
+.aititle{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--sand);}
+.aitxt{font-size:13px;line-height:1.75;color:var(--snow);white-space:pre-wrap;}
+.aitxt.ph{color:var(--mist);font-style:italic;font-size:12px;}
+.spin{display:none;align-items:center;gap:5px;color:var(--sand-dim);font-size:11px;}
+.spin.on{display:flex;}
+.dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--sand);animation:blink 1.2s infinite;}
+.dots span:nth-child(2){animation-delay:.2s;}.dots span:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.pzone{border:2px dashed var(--border);border-radius:9px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:7px;}
+.pzone:hover,.pzone.drag{border-color:var(--sand-dim);background:rgba(200,169,110,.03);}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;margin-top:7px;}
+.pitem{position:relative;border-radius:7px;overflow:hidden;border:1px solid var(--border);}
+.pitem img{width:100%;height:68px;object-fit:cover;display:block;cursor:pointer;}
+.pdel{position:absolute;top:3px;right:3px;background:rgba(217,64,64,.88);border:none;border-radius:50%;width:16px;height:16px;cursor:pointer;font-size:9px;color:white;display:flex;align-items:center;justify-content:center;}
+.pcap{font-size:9px;color:var(--mist);padding:2px 4px;background:rgba(0,0,0,.55);position:absolute;bottom:0;left:0;right:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.recbtn{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:22px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all .3s;font-family:'Inter',sans-serif;}
+.recbtn.idle{background:rgba(200,169,110,.12);color:var(--sand);border:1px solid rgba(200,169,110,.3);}
+.recbtn.rec{background:rgba(217,64,64,.18);color:var(--danger);border:1px solid rgba(217,64,64,.5);animation:rp 1.5s infinite;}
+@keyframes rp{0%,100%{box-shadow:0 0 0 0 rgba(217,64,64,.4)}50%{box-shadow:0 0 0 8px rgba(217,64,64,0)}}
+.arow{display:flex;align-items:center;gap:7px;background:var(--deep);border:1px solid var(--border);border-radius:7px;padding:7px;margin-bottom:5px;}
+.arow audio{flex:1;height:28px;}
+.adel{background:rgba(217,64,64,.8);border:none;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:9px;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.vitem{background:var(--deep);border:1px solid var(--border);border-radius:7px;padding:8px;margin-bottom:5px;display:flex;align-items:flex-start;gap:7px;}
+.vdel{background:rgba(217,64,64,.7);border:none;border-radius:50%;width:16px;height:16px;cursor:pointer;font-size:9px;color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:7px;}
+.wcard{background:var(--deep);border:1px solid var(--border);border-radius:9px;padding:9px;text-align:center;}
+.wcard.today{border-color:var(--sand);}
+.wday{font-family:'Courier Prime',monospace;font-size:9px;color:var(--mist);margin-bottom:2px;}
+.wicon{font-size:24px;margin:2px 0;}
+.wtemp{font-family:'Oswald',sans-serif;font-size:16px;color:var(--snow);}
+.wdesc{font-size:10px;color:var(--mist);margin-top:1px;}
+.wwind{font-size:10px;color:var(--warn);margin-top:1px;}
+.walert{background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.3);border-radius:7px;padding:8px 11px;font-size:11px;color:var(--warn);margin-bottom:9px;display:none;}
+.walert.show{display:flex;align-items:center;gap:7px;}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:7px;margin-bottom:14px;}
+.scard{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center;}
+.snum{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--sand);line-height:1;}
+.sunit{font-size:10px;color:var(--sand-dim);font-family:'Courier Prime',monospace;}
+.slbl2{font-size:11px;color:var(--mist);margin-top:2px;}
+.rrow{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;margin-bottom:4px;}
+.rrow:hover{border-color:var(--sand-dim);}
+.rrow.cur{border-color:var(--ember);}
+.rrow.done{border-color:var(--steppe);}
+.rdnum{font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;color:var(--sand);min-width:26px;}
+.rinfo{flex:1;}
+.rdest{font-size:13px;font-weight:500;color:var(--snow);}
+.rsub{font-family:'Courier Prime',monospace;font-size:10px;color:var(--mist);margin-top:1px;}
+.rkm{font-family:'Oswald',sans-serif;font-size:13px;color:var(--sand-dim);}
+.symgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:6px;margin-bottom:10px;}
+.symbtn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 9px;cursor:pointer;font-size:11px;color:var(--mist);text-align:center;transition:all .2s;}
+.symbtn.on{border-color:var(--ember);color:var(--snow);background:rgba(232,98,42,.08);}
+.symicon{font-size:16px;display:block;margin-bottom:2px;}
+.pctabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px;}
+.pctab{padding:4px 10px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--mist);font-size:11px;cursor:pointer;transition:all .2s;}
+.pctab.on{border-color:var(--sand);color:var(--sand);}
+.pgrid2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:9px;cursor:pointer;transition:all .2s;}
+.pcard:hover{border-color:var(--sand-dim);}
+.pen{font-size:10px;color:var(--mist);margin-bottom:2px;}
+.pmn{font-size:12px;font-weight:600;color:var(--sand);}
+.pph{font-family:'Courier Prime',monospace;font-size:10px;color:var(--ember);margin-top:1px;}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px;}
+.icard{background:var(--deep);border:1px solid var(--border);border-radius:9px;padding:11px;}
+.ititle{font-size:10px;color:var(--mist);margin-bottom:3px;font-family:'Courier Prime',monospace;}
+.ival{font-family:'Oswald',sans-serif;font-size:17px;color:var(--sand);}
+.isub{font-size:10px;color:var(--mist);margin-top:1px;}
+.bwrap{background:var(--border);border-radius:3px;height:5px;margin-top:4px;}
+.bfill{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--ember),var(--sand));transition:width .6s;}
+.lidrow{display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:5px;}
+.lrank{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;min-width:22px;}
+.lg{color:#FFD700;}.ls{color:#C0C0C0;}.lb{color:#CD7F32;}.lo{color:var(--mist);}
+.lname{flex:1;font-size:13px;font-weight:500;color:var(--snow);}
+.lpts{font-family:'Oswald',sans-serif;font-size:15px;color:var(--sand);}
+.achgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:7px;}
+.achcard{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:11px;text-align:center;}
+.achcard.on{border-color:var(--sand);background:rgba(200,169,110,.05);}
+.achcard.off{opacity:.35;}
+.achicon{font-size:27px;margin-bottom:4px;}
+.achname{font-size:11px;font-weight:600;color:var(--snow);}
+.achdesc{font-size:10px;color:var(--mist);margin-top:2px;}
+.achpts{font-size:10px;color:var(--sand);margin-top:2px;}
+.crow{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--card);border:1px solid var(--border);border-radius:7px;margin-bottom:4px;cursor:pointer;}
+.crow.done{opacity:.5;text-decoration:line-through;}
+.crow.done .cbox{background:var(--steppe);border-color:var(--steppe);}
+.cbox{width:15px;height:15px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.ecard{background:rgba(217,64,64,.06);border:1px solid rgba(217,64,64,.25);border-radius:9px;padding:12px;margin-bottom:8px;}
+.etitle{font-family:'Oswald',sans-serif;font-size:12px;color:var(--danger);margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.econtent{font-size:12px;color:var(--snow);line-height:1.75;}
+.sos-btn{display:block;width:100%;padding:13px;background:var(--danger);color:white;border:none;border-radius:9px;font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-bottom:11px;}
+.pwrap{background:var(--border);border-radius:3px;height:5px;overflow:hidden;}
+.pfill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ember),var(--sand));transition:width .6s;}
+.tipbox{background:rgba(200,169,110,.06);border:1px solid rgba(200,169,110,.18);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--mist);line-height:1.65;margin-bottom:9px;}
+.tipbox strong{color:var(--sand);}
+.toast{position:fixed;bottom:16px;right:16px;background:var(--card);border:1px solid var(--sand);border-radius:8px;padding:9px 13px;font-size:12px;color:var(--snow);z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;max-width:230px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;align-items:center;justify-content:center;}
+.moverlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;max-width:450px;width:92%;max-height:80vh;overflow-y:auto;}
+.mtitle{font-family:'Oswald',sans-serif;font-size:15px;color:var(--sand);margin-bottom:12px;}
+.mclose{float:right;background:none;border:none;color:var(--mist);font-size:17px;cursor:pointer;}
+@media(max-width:580px){
+  .main{padding:12px 12px 100px;}
+  .frow{grid-template-columns:1fr;}
+  .pgrid2{grid-template-columns:1fr;}
+  .sgrid{grid-template-columns:repeat(2,1fr);}
+  .igrid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="header-top">
+    <div><div class="brand-eyebrow">MotoExpedia · 2200KM · 15 Days</div><div class="brand-name">⚡ MONGOL ODYSSEY HQ</div></div>
+    <div class="header-right">
+      <div class="wchip" onclick="switchTab('weather');fetchWeather();" id="wchip">🌤️ --°C</div>
+      <div class="online-pill live" id="opill"><div class="odot"></div><span id="otxt">LIVE</span></div>
+    </div>
+  </div>
+  <div class="mode-bar">
+    <span class="mode-label" id="mlabel">🌅 Morning — weather & kit check</span>
+    <div class="mode-toggle">
+      <button class="mbtn morning on" id="btnM" onclick="setMode('morning')">🌅 Morning</button>
+      <button class="mbtn evening" id="btnE" onclick="setMode('evening')">🌙 Evening</button>
+    </div>
+  </div>
+  <div class="tape-wrap"><div class="tape" id="tape"></div></div>
+</div>
+<div class="tabs">
+  <button class="tbtn active" onclick="switchTab('log')">📋 Log</button>
+  <button class="tbtn" onclick="switchTab('weather')">🌤️ Weather</button>
+  <button class="tbtn" onclick="switchTab('memoir')">✍️ Memoir</button>
+  <button class="tbtn" onclick="switchTab('route')">🗺️ Route</button>
+  <button class="tbtn" onclick="switchTab('mechanic')">🔧 Mechanic</button>
+  <button class="tbtn" onclick="switchTab('phrases')">🗣️ Phrases</button>
+  <button class="tbtn" onclick="switchTab('stats')">📊 Stats</button>
+  <button class="tbtn" onclick="switchTab('tour')">💼 Tour Intel</button>
+  <button class="tbtn" onclick="switchTab('fun')">🎮 Fun</button>
+  <button class="tbtn" onclick="switchTab('checklist')">✅ Kit</button>
+  <button class="tbtn" onclick="switchTab('emergency')">🆘 SOS</button>
+</div>
+<div class="main">
+
+<!-- LOG -->
+<div class="panel active" id="panel-log">
+  <div class="hero" id="hero"></div>
+  <!-- MORNING -->
+  <div class="mpanel active" id="mpanel">
+    <div class="tipbox"><strong>🌅 Morning Routine:</strong> Check today's weather → run through kit checklist → read tomorrow's route. Log your ride data this evening after you arrive.</div>
+    <div class="brow" style="margin-bottom:11px;">
+      <button class="btn bm" onclick="switchTab('weather');fetchWeather();">🌤️ Today's Weather</button>
+      <button class="btn bg" onclick="switchTab('checklist')">✅ Kit Check</button>
+      <button class="btn bg" onclick="showPrevBriefing()">🧭 Last Briefing</button>
+    </div>
+    <div class="slabel">Today's Route</div>
+    <div class="card" id="mpreview"></div>
+    <div class="slabel">Morning AI Brief</div>
+    <div class="aibox">
+      <div class="aihdr">
+        <div class="aititle">🧭 TODAY'S INTEL</div>
+        <div class="spin" id="mbrfSpin"><div class="dots"><span></span><span></span><span></span></div></div>
+        <button class="btn bg" style="font-size:10px;padding:4px 8px;" onclick="genMorningBrief()">⚡ Generate</button>
+      </div>
+      <div class="needs-net" id="mbrfWarn" style="display:none;">⚡ Needs internet to generate</div>
+      <div class="aitxt ph" id="mbrfTxt">Tap Generate for today's route brief — terrain, fuel strategy, safety priorities. Needs internet.</div>
+    </div>
+  </div>
+  <!-- EVENING -->
+  <div class="epanel" id="epanel">
+    <div class="tipbox"><strong>🌙 Evening Routine:</strong> Fill in today's data while fresh. Add photos from gallery. Record a voice memo if too tired to type. Hit "AI Memoir" for your story. Then "Tomorrow's Brief" to prep for morning.</div>
+    <!-- PHOTOS -->
+    <div class="slabel">📷 Photos — Add from Gallery</div>
+    <div class="card" style="padding:11px;">
+      <div class="offline-note">📴 Works offline · stored on this device · max 5MB per photo · auto-compressed</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+        <button class="btn bs" onclick="document.getElementById('pinput').click()">📷 Add Photos</button>
+        <button class="recbtn idle" id="recBtn" onclick="toggleRec()">🎙️ Voice Memo</button>
+        <span id="recTimer" style="display:none;font-family:'Courier Prime',monospace;font-size:11px;color:var(--danger);align-items:center;"></span>
+      </div>
+      <input type="file" id="pinput" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)">
+      <div class="pzone" id="pzone" onclick="document.getElementById('pinput').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleDrop(event)">
+        <div style="font-size:22px;">📷</div>
+        <div style="font-size:11px;color:var(--mist);margin-top:4px;">Tap to open phone gallery · drag & drop<br><span style="font-size:10px;color:var(--sand-dim);">Photos auto-compressed · No video upload — log as note below</span></div>
+      </div>
+      <div class="pgrid" id="pgrid"></div>
+      <div id="alist" style="margin-top:6px;"></div>
+    </div>
+    <!-- VIDEO NOTES -->
+    <div class="slabel">🎬 Video Notes — Describe Videos on Your Phone</div>
+    <div class="card" style="padding:11px;">
+      <div class="offline-note">📴 Text log only · your phone keeps the actual video file</div>
+      <div style="display:flex;gap:6px;margin-bottom:7px;">
+        <input type="text" id="vninput" placeholder="e.g. River crossing Orkhon · 2min · 4:30pm · almost went down!" style="flex:1;">
+        <button class="btn bg" style="flex-shrink:0;" onclick="addVidNote()">+ Log</button>
+      </div>
+      <div id="vnlist"></div>
+      <div style="font-size:10px;color:var(--mist);margin-top:4px;">AI memoir will reference your video descriptions when writing your story.</div>
+    </div>
+    <!-- RIDE DATA -->
+    <div class="slabel">Ride Data</div>
+    <div class="card">
+      <div class="frow">
+        <div class="fgroup"><label>⏱ KM Ridden</label><input type="number" id="lKm" placeholder="e.g. 134"></div>
+        <div class="fgroup"><label>🕐 Duration</label><input type="text" id="lDur" placeholder="e.g. 6h 30m"></div>
+      </div>
+      <div class="frow">
+        <div class="fgroup"><label>⛽ Fuel (Litres)</label><input type="number" id="lFuel" placeholder="e.g. 18"></div>
+        <div class="fgroup"><label>💰 Fuel Cost (₮)</label><input type="number" id="lFuelC" placeholder="e.g. 54000"></div>
+      </div>
+      <div class="frow">
+        <div class="fgroup"><label>🌡️ Weather</label>
+          <select id="lWx"><option value="">Select...</option>
+            <option>☀️ Clear &amp; Sunny</option><option>⛅ Partly Cloudy</option><option>🌧️ Rain</option>
+            <option>⛈️ Thunderstorm</option><option>🌫️ Fog / Dust Storm</option><option>💨 Strong Winds</option><option>❄️ Near Freezing</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>🌡️ Temp (°C)</label><input type="number" id="lTemp" placeholder="e.g. 18"></div>
+      </div>
+      <div class="frow">
+        <div class="fgroup"><label>🏔️ Terrain Difficulty</label>
+          <select id="lDiff"><option value="">Rate...</option>
+            <option>1 – Easy</option><option>2 – Mostly good</option><option>3 – Moderate</option>
+            <option>4 – Tough / Technical</option><option>5 – Extreme</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>😤 Fatigue</label>
+          <select id="lFat"><option value="">How tired?</option>
+            <option>Fresh as steppe wind 🌬️</option><option>Good, slight tired</option>
+            <option>Moderate fatigue</option><option>Very tired, sore</option><option>Wrecked 💀</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fgroup"><label>🏕️ Stay Tonight</label>
+          <select id="lStay"><option value="">Select...</option>
+            <option>🏨 Hotel</option><option>🏠 Ger Camp (paid)</option>
+            <option>🤝 Nomad Ger (hosted)</option><option>⛺ Wild Camp</option><option>🛏️ Guesthouse</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>💰 Stay Cost (₮)</label><input type="number" id="lStayC" placeholder="e.g. 120000"></div>
+      </div>
+      <div class="fgroup" style="margin-bottom:7px;"><label>🍜 Food &amp; Meals</label><input type="text" id="lFood" placeholder="e.g. Tsuivan noodles, buuz dumplings, airag..."></div>
+      <div class="fgroup" style="margin-bottom:7px;"><label>👥 People Met / Cultural Moments</label><input type="text" id="lPpl" placeholder="e.g. Herder family helped fix tyre, shared airag and stories..."></div>
+      <div class="fgroup" style="margin-bottom:7px;"><label>😊 Mood</label>
+        <div class="mood-row" id="moodRow">
+          <button class="mbtn2" onclick="setMood(this,'🔥')">🔥</button><button class="mbtn2" onclick="setMood(this,'😄')">😄</button>
+          <button class="mbtn2" onclick="setMood(this,'😌')">😌</button><button class="mbtn2" onclick="setMood(this,'😤')">😤</button>
+          <button class="mbtn2" onclick="setMood(this,'🥴')">🥴</button><button class="mbtn2" onclick="setMood(this,'🤯')">🤯</button>
+          <button class="mbtn2" onclick="setMood(this,'🥹')">🥹</button><button class="mbtn2" onclick="setMood(this,'💀')">💀</button>
+        </div>
+      </div>
+      <div class="fgroup" style="margin-bottom:7px;"><label>⭐ Day Rating</label>
+        <div class="star-row" id="starRow">
+          <button class="sbtn" onclick="setStars(1)">★</button><button class="sbtn" onclick="setStars(2)">★</button>
+          <button class="sbtn" onclick="setStars(3)">★</button><button class="sbtn" onclick="setStars(4)">★</button>
+          <button class="sbtn" onclick="setStars(5)">★</button>
+        </div>
+      </div>
+      <div class="fgroup" style="margin-bottom:7px;"><label>📝 Highlights &amp; Experiences (be generous — AI memoir uses this)</label>
+        <textarea id="lNotes" rows="4" placeholder="What happened today? Special moments, encounters, tough sections, what moved you...&#10;More detail = richer memoir."></textarea>
+      </div>
+      <div class="fgroup" style="margin-bottom:7px;"><label>⚠️ Issues / Hazards (warn future riders)</label>
+        <textarea id="lIssues" rows="2" placeholder="Road hazards, bike problems, closed fuel stops, dangerous sections..."></textarea>
+      </div>
+      <div class="fgroup" style="margin-bottom:11px;"><label>💡 Tips for Future Riders</label>
+        <textarea id="lTips" rows="2" placeholder="Best camp spots, fuel availability, must-see detours, local contacts, best food..."></textarea>
+      </div>
+      <div class="brow">
+        <button class="btn bp" onclick="saveLog()">💾 Save Log</button>
+        <button class="btn bs" onclick="genMemoir()">✨ AI Memoir</button>
+        <button class="btn bg" onclick="genBriefing()">🧭 Tomorrow's Brief</button>
+      </div>
+    </div>
+    <div class="slabel">AI Briefing — Tomorrow</div>
+    <div class="aibox">
+      <div class="aihdr">
+        <div class="aititle">🧭 TOMORROW'S INTEL</div>
+        <div class="spin" id="brfSpin"><div class="dots"><span></span><span></span><span></span></div></div>
+      </div>
+      <div class="needs-net" id="brfWarn" style="display:none;">⚡ Needs internet to generate</div>
+      <div class="aitxt ph" id="brfTxt">Save today's log then tap "Tomorrow's Brief" above.</div>
+    </div>
+  </div>
+</div>
+
+<!-- WEATHER -->
+<div class="panel" id="panel-weather">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;flex-wrap:wrap;gap:7px;">
+    <div><div class="slabel" style="margin:0;">5-Day Forecast</div><div style="font-family:'Oswald',sans-serif;font-size:17px;color:var(--snow);" id="wdtitle">Mongolia</div></div>
+    <button class="btn bs" onclick="fetchWeather()">🔄 Fetch Weather</button>
+  </div>
+  <div class="needs-net" id="wxWarn" style="display:none;">⚡ Weather requires internet — all other features work fully offline</div>
+  <div class="walert" id="walert">⚠️ <span id="walerttxt"></span></div>
+  <div class="wgrid" id="wgrid"><div style="text-align:center;padding:22px;color:var(--mist);font-size:12px;grid-column:1/-1;">Tap Fetch Weather for your day's location forecast</div></div>
+  <div class="slabel" style="margin-top:15px;">AI Ride Risk Assessment</div>
+  <div class="aibox">
+    <div class="aihdr"><div class="aititle">🌩️ WEATHER RISK BRIEF</div><div class="spin" id="wxSpin"><div class="dots"><span></span><span></span><span></span></div></div></div>
+    <div class="aitxt ph" id="wxRisk">Fetch weather first to get tomorrow's ride risk assessment.</div>
+  </div>
+  <div class="slabel" style="margin-top:15px;">Mongolia Seasonal Intel</div>
+  <div class="card"><div style="font-size:12px;color:var(--mist);line-height:1.85;">
+    <strong style="color:var(--sand);">Summer (Jun–Aug):</strong> 20–30°C days · 5°C nights · afternoon thunderstorms common<br>
+    <strong style="color:var(--sand);">Steppe Winds:</strong> Can hit 80+ km/h instantly — always watch western horizon<br>
+    <strong style="color:var(--sand);">Rivers (Day 5, 10–11):</strong> Peak July — can be uncrossable after heavy rain<br>
+    <strong style="color:var(--sand);">Gobi area (Day 2–3):</strong> Zud dust storms can appear in minutes<br>
+    <strong style="color:var(--sand);">Khövsgöl (Day 10–11):</strong> 5°C colder than rest of route — always carry layers
+  </div></div>
+</div>
+
+<!-- MEMOIR -->
+<div class="panel" id="panel-memoir">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:7px;">
+    <div><div class="slabel" style="margin:0;">The Great Mongol Odyssey</div><div style="font-family:'Oswald',sans-serif;font-size:19px;color:var(--snow);">Expedition Memoir</div></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn bs" onclick="genFullMemoir()">📖 Full Story</button>
+      <button class="btn bg" onclick="exportMemoir()">📤 .txt Export</button>
+      <button class="btn bg" onclick="exportBackup()">💾 Backup</button>
+    </div>
+  </div>
+  <div class="offline-note">📴 All memoir data stored offline · Export .txt regularly as backup</div>
+  <div class="spin" id="mSpin" style="margin-bottom:11px;"><div class="dots"><span></span><span></span><span></span></div><span style="font-size:11px;color:var(--sand-dim);margin-left:5px;">Crafting your story...</span></div>
+  <div id="mEntries"></div>
+  <div class="aibox" id="fullMBox" style="display:none;">
+    <div class="aihdr"><div class="aititle">📖 EXPEDITION MEMOIR</div><button class="btn bg" style="font-size:10px;padding:3px 7px;" onclick="copyMemoir()">📋 Copy</button></div>
+    <div class="aitxt" id="fullMTxt"></div>
+  </div>
+</div>
+
+<!-- ROUTE -->
+<div class="panel" id="panel-route">
+  <div class="slabel">Full Route — 2200 KM · 15 Days</div>
+  <div style="margin-bottom:9px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:11px;color:var(--mist);"><span>Expedition progress</span><span id="rpct">0%</span></div>
+    <div class="pwrap"><div class="pfill" id="rbar" style="width:0%"></div></div>
+  </div>
+  <div id="rlist"></div>
+</div>
+
+<!-- MECHANIC -->
+<div class="panel" id="panel-mechanic">
+  <div style="font-family:'Oswald',sans-serif;font-size:17px;color:var(--snow);margin-bottom:3px;">🔧 AI Field Mechanic</div>
+  <div class="offline-note">📴 Symptom reference offline · AI diagnosis needs internet</div>
+  <div class="slabel">Quick Symptoms</div>
+  <div class="symgrid" id="symgrid"></div>
+  <div class="fgroup" style="margin-bottom:8px;"><label>Describe the problem in detail</label>
+    <textarea id="mechInput" rows="3" placeholder="e.g. Engine stalls at idle after 10 mins running, worse cold, backfires on decel..."></textarea>
+  </div>
+  <div class="brow" style="margin-bottom:14px;">
+    <button class="btn bp" onclick="getMechAdvice()">🔧 Diagnose</button>
+    <button class="btn bg" onclick="clearMech()">Clear</button>
+  </div>
+  <div class="aibox" id="mechResult" style="display:none;">
+    <div class="aihdr"><div class="aititle">🛠️ FIELD DIAGNOSIS</div><div class="spin" id="mechSpin"><div class="dots"><span></span><span></span><span></span></div></div></div>
+    <div class="aitxt" id="mechTxt"></div>
+  </div>
+  <div class="slabel" style="margin-top:15px;">Critical Spares Checklist</div>
+  <div id="spares"></div>
+</div>
+
+<!-- PHRASES -->
+<div class="panel" id="panel-phrases">
+  <div style="font-family:'Oswald',sans-serif;font-size:17px;color:var(--snow);margin-bottom:3px;">🗣️ Mongolian Phrasebook</div>
+  <div class="offline-note">📴 100% offline · Tap any card to copy to clipboard</div>
+  <div class="pctabs" id="pctabs"></div>
+  <div id="pcontent"></div>
+  <div class="slabel" style="margin-top:14px;">AI Phrase Generator</div>
+  <div class="card">
+    <div class="fgroup" style="margin-bottom:7px;"><label>What do you need to say?</label>
+      <input type="text" id="phraseIn" placeholder="e.g. My clutch cable snapped, need a mechanic in next town">
+    </div>
+    <button class="btn bs" onclick="genPhrase()">🗣️ Translate</button>
+    <div class="needs-net" id="phraseWarn" style="display:none;margin-top:6px;">⚡ Needs internet</div>
+    <div id="phraseOut" style="margin-top:7px;"></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="panel" id="panel-stats">
+  <div class="slabel">Expedition Statistics</div>
+  <div class="offline-note">📴 All stats from your offline logs</div>
+  <div class="sgrid" id="sgrid"></div>
+  <div class="slabel">KM Per Day</div>
+  <div id="kmchart" class="card" style="padding:12px;"></div>
+  <div class="slabel">Mood Journey</div>
+  <div id="moodline" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;"></div>
+  <div class="slabel">Expenditure</div>
+  <div id="spend" class="card" style="padding:12px;"></div>
+</div>
+
+<!-- TOUR INTEL -->
+<div class="panel" id="panel-tour">
+  <div style="font-family:'Oswald',sans-serif;font-size:17px;color:var(--snow);margin-bottom:3px;">💼 Commercial Tour Intelligence</div>
+  <div style="font-size:12px;color:var(--mist);margin-bottom:11px;">Auto-built from logged ride data · for future tour planning &amp; client briefings</div>
+  <div class="brow" style="margin-bottom:11px;">
+    <button class="btn bp" onclick="genTourReport()">🤖 AI Tour Report</button>
+    <button class="btn bg" onclick="exportTour()">📤 Export</button>
+  </div>
+  <div class="slabel">Performance Insights</div>
+  <div class="igrid" id="igrid"></div>
+  <div class="slabel">Day Ratings</div>
+  <div id="dratings"></div>
+  <div class="slabel">AI Tour Report</div>
+  <div class="aibox">
+    <div class="aihdr"><div class="aititle">📊 OPERATOR REPORT</div><div class="spin" id="tourSpin"><div class="dots"><span></span><span></span><span></span></div></div></div>
+    <div class="aitxt ph" id="tourTxt">Log 2+ days then tap AI Tour Report.</div>
+  </div>
+  <div class="slabel" style="margin-top:15px;">Fuel Stop Map</div>
+  <div id="fstops"></div>
+</div>
+
+<!-- FUN -->
+<div class="panel" id="panel-fun">
+  <div style="font-family:'Oswald',sans-serif;font-size:17px;color:var(--snow);margin-bottom:3px;">🎮 Camp Night Entertainment</div>
+  <div class="offline-note">📴 Trivia, challenges &amp; leaderboard work offline · AI stories need internet</div>
+  <div class="slabel">🏆 Rider Leaderboard</div>
+  <div class="card" style="margin-bottom:10px;">
+    <div style="display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap;">
+      <input type="text" id="riderIn" placeholder="Rider name" style="flex:1;min-width:90px;">
+      <button class="btn bs" onclick="addRider()">+ Add</button>
+    </div>
+    <div id="leaderboard"></div>
+    <div style="margin-top:7px;font-size:10px;color:var(--mist);">Points: KM÷10 + Rating×10 + 🔥×5 + issues×2</div>
+  </div>
+  <div class="slabel">🏅 Achievements</div>
+  <div class="achgrid" id="achgrid"></div>
+  <div class="slabel" style="margin-top:14px;">🎲 Daily Steppe Challenge</div>
+  <div class="aibox">
+    <div class="aihdr"><div class="aititle">⚡ TODAY'S CHALLENGE</div><button class="btn bg" style="font-size:10px;padding:3px 7px;" onclick="newChallenge()">🎲 New</button></div>
+    <div class="aitxt" id="challenge">Loading...</div>
+  </div>
+  <div class="slabel" style="margin-top:14px;">🧠 Mongolia Trivia</div>
+  <div class="card">
+    <div id="trivQ" style="font-size:13px;color:var(--snow);margin-bottom:9px;line-height:1.5;font-weight:500;"></div>
+    <div id="trivOpts" style="display:flex;flex-direction:column;gap:5px;"></div>
+    <div id="trivFb" style="margin-top:7px;font-size:12px;display:none;line-height:1.6;"></div>
+    <button class="btn bg" style="margin-top:9px;font-size:11px;" onclick="nextTrivia()">Next ➜</button>
+  </div>
+  <div class="slabel" style="margin-top:14px;">🔥 AI Campfire Story</div>
+  <div class="aibox">
+    <div class="aihdr"><div class="aititle">🔥 STEPPE LEGEND</div><div class="spin" id="storySpin"><div class="dots"><span></span><span></span><span></span></div></div><button class="btn bg" style="font-size:10px;padding:3px 7px;" onclick="genStory()">Tell Story</button></div>
+    <div class="aitxt ph" id="storyTxt">Tap "Tell Story" for a Mongolian legend — perfect to read aloud at tonight's campfire.</div>
+  </div>
+</div>
+
+<!-- CHECKLIST -->
+<div class="panel" id="panel-checklist">
+  <div style="font-family:'Oswald',sans-serif;font-size:17px;color:var(--snow);margin-bottom:3px;">✅ Morning Kit Check</div>
+  <div class="offline-note">📴 100% offline — run through before every departure</div>
+  <div class="brow" style="margin-bottom:11px;">
+    <button class="btn bs" onclick="resetCL()">🔄 Reset for Today</button>
+    <button class="btn bg" onclick="checkAll()">✅ All Clear</button>
+  </div>
+  <div id="clcontent"></div>
+</div>
+
+<!-- SOS / EMERGENCY -->
+<div class="panel" id="panel-emergency">
+  <div style="font-family:'Oswald',sans-serif;font-size:17px;color:var(--danger);margin-bottom:9px;">🆘 Emergency Protocols</div>
+  <div class="offline-note">📴 100% offline — all protocols stored locally always</div>
+  <button class="sos-btn" onclick="triggerSOS()">🆘 COPY SOS INFO + GPS COORDS</button>
+
+  <div class="slabel">☁️ Shared Drive Backup</div>
+  <div class="card">
+    <div id="backupBadge" style="font-size:12px;color:var(--warn);margin-bottom:9px;font-family:'Courier Prime',monospace;">No backup URL set</div>
+    <div class="fgroup" style="margin-bottom:7px;">
+      <label>Backup Web App URL (set once, shared by all 6 riders)</label>
+      <input type="text" id="backupUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+    <div class="brow" style="margin-bottom:9px;">
+      <button class="btn bs" onclick="setBackupUrl(document.getElementById('backupUrlInput').value)">💾 Save URL</button>
+      <button class="btn bg" onclick="promptForRiderName()">👤 Set My Name</button>
+      <button class="btn bg" onclick="flushSyncQueue();showToast('Sync attempted')">🔄 Sync Now</button>
+    </div>
+    <div style="font-size:11px;color:var(--mist);line-height:1.6;">
+      Every Save Log, Memoir, Photo, Voice Memo, and Video Note auto-uploads to the shared Drive folder in the background — no manual steps needed once set up. If offline, entries queue and retry automatically when signal returns. This is in addition to local storage on your device, not a replacement — both copies exist.
+    </div>
+  </div>
+
+  <div id="econtent"></div>
+</div>
+
+</div><!-- /main -->
+<div class="moverlay" id="moverlay" onclick="closeModal(event)">
+  <div class="modal"><button class="mclose" onclick="document.getElementById('moverlay').classList.remove('open')">✕</button><div class="mtitle" id="mtitle"></div><div id="mbody"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const ROUTE=[
+  {day:1,dest:"Ulaanbaatar",km:0,terrain:"Rest Day",icon:"🏙️",type:"rest",lat:47.8864,lon:106.9057,desc:"Arrival day. UB at 1,350m, Tuul River valley. 1.5M people. Rest, gear prep, team brief."},
+  {day:2,dest:"Zorgol Khairkhan",km:130,terrain:"Off Road",icon:"🏔️",type:"offroad",lat:47.1,lon:105.5,desc:"130km toward Gobi. Sacred granite formation 1,686m. Ash cliffs, argali sheep, red deer. Ancient soldier graves. First real off-road day."},
+  {day:3,dest:"Khogno Khan",km:220,terrain:"Mixed",icon:"🌵",type:"mixed",lat:47.3,lon:103.5,desc:"220km to Khögnö Khan NP, 47000ha where steppe meets Siberian taiga. Granite, birch forests, springs. Exceptional biodiversity."},
+  {day:4,dest:"Kharkhorin",km:90,terrain:"Mixed",icon:"🏛️",type:"mixed",lat:47.195,lon:102.838,desc:"90km to Genghis Khans 1220 AD capital. Four granite turtles. Palace ruins. 230 plus coins from 10 nations. Crossroads of world civilizations."},
+  {day:5,dest:"Orkhon Valley",km:100,terrain:"Off Road",icon:"🌊",type:"offroad",lat:46.9,lon:102.2,desc:"UNESCO nomadic heartland. Orkhon Waterfalls in volcanic canyon. Tovkhon Monastery 17th century. Horses, yaks, sheep everywhere. River crossings."},
+  {day:6,dest:"Tsagaan Sum Hot Springs",km:60,terrain:"Off Road",icon:"♨️",type:"offroad",lat:47.7,lon:101.5,desc:"Short 60km. Healing springs at 85.5C, 1860m altitude. Sodium carbonate, sulfate, fluorine waters. Perfect for rider muscles."},
+  {day:7,dest:"Ikh Tamir",km:130,terrain:"Mixed",icon:"🗿",type:"mixed",lat:47.9,lon:101.0,desc:"Open-air museum. Funerary deer stones. Tsatsiin Ereg has 26 preserved deer stones, hundreds of petroglyphs, Neolithic burial sites."},
+  {day:8,dest:"Terkhiin Tsagaan Nuur",km:150,terrain:"Asphalt",icon:"🏞️",type:"asphalt",lat:48.15,lon:99.65,desc:"White Lake at 2060m, formed by Khorgo Volcano eruption. 16km long, 61 sq km. Pike, axis deer, great cormorants. Scenic asphalt day."},
+  {day:9,dest:"Shine Ider",km:140,terrain:"Off Road",icon:"🌾",type:"offroad",lat:49.2,lon:99.4,desc:"Rolling grasslands of northern Mongolia. 2050 sq km, just 4000 people. Untouched valleys, herds grazing freely. Remote and beautiful."},
+  {day:10,dest:"Khovsgol Lake",km:220,terrain:"Mixed",icon:"💎",type:"mixed",lat:51.0,lon:100.5,desc:"Blue Pearl of Mongolia. 1645m altitude. 2 percent of worlds freshwater, 480.7 cubic km. 136km long, 267m deep. Baikals little brother."},
+  {day:11,dest:"Erdenebulgan",km:150,terrain:"Off Road",icon:"🌲",type:"offroad",lat:49.8,lon:100.8,desc:"Khovsgol Province, 5000 sq km, 2700 people. Wide valleys, forested mountains, rivers. Pure northern Mongolian wilderness."},
+  {day:12,dest:"Uran Togoo",km:210,terrain:"Mixed",icon:"🌋",type:"mixed",lat:49.0,lon:102.7,desc:"Uran Uul extinct volcano: 1686m crater, 500m diameter, 50m deep. Siberian larch. Apollo butterflies. Exceptional biodiversity."},
+  {day:13,dest:"Ogii Lake",km:190,terrain:"Off Road",icon:"🐟",type:"offroad",lat:47.77,lon:102.78,desc:"Sacred lake in eastern Arkhangai, 1337m. 25 sq km. Pike, perch, carp, burbot. Migratory bird stopover. Ger camps with canoes."},
+  {day:14,dest:"Sanderbury Farm",km:230,terrain:"Asphalt",icon:"🏡",type:"asphalt",lat:48.0,lon:104.5,desc:"Long asphalt run toward capital. Open steppe with gers and livestock. Sanderbury Farm, last nomadic serenity before UB."},
+  {day:15,dest:"Ulaanbaatar",km:180,terrain:"Mixed",icon:"🏁",type:"mixed",lat:47.8864,lon:106.9057,desc:"Final stage following Tuul River. 2200km complete. Countryside shifts to city. End of the Great Mongol Odyssey."}
+];
+let curDay=1,curMode="morning",selMood="",selStars=0;
+let logs={},riders=[],photos={},audio={},vidNotes={},cl={};
+let mr=null,rc=[],ri=null,rs=0,activePC=0,trivI=0,trivDone=false;
+
+let BACKUP_URL=localStorage.getItem("mo_backup_url")||"";
+let myRiderName=localStorage.getItem("mo_rider_name")||"";
+let syncQueue=[];
+try{syncQueue=JSON.parse(localStorage.getItem("mo_sync_queue")||"[]");}catch(e){syncQueue=[];}
+
+function setBackupUrl(url){
+  BACKUP_URL=url.trim();
+  localStorage.setItem("mo_backup_url",BACKUP_URL);
+  showToast(BACKUP_URL?"Backup URL saved":"Backup URL cleared");
+  updateBackupBadge();
+}
+function promptForRiderName(){
+  const n=prompt("Enter your name (labels your entries in the shared backup):",myRiderName||"");
+  if(n&&n.trim()){
+    myRiderName=n.trim();
+    localStorage.setItem("mo_rider_name",myRiderName);
+    showToast("Rider name set: "+myRiderName);
+    updateBackupBadge();
+  }
+}
+function updateBackupBadge(){
+  const el=document.getElementById("backupBadge");
+  if(!el)return;
+  if(!BACKUP_URL){el.textContent="No backup URL set";el.style.color="var(--warn)";return;}
+  if(!myRiderName){el.textContent="No rider name set";el.style.color="var(--warn)";return;}
+  el.textContent="Backing up as "+myRiderName+" ("+syncQueue.length+" queued)";
+  el.style.color=syncQueue.length>0?"var(--warn)":"#7DBF7A";
+}
+function queueSync(payload){
+  syncQueue.push({payload:payload,ts:Date.now()});
+  persistQueue();updateBackupBadge();flushSyncQueue();
+}
+function persistQueue(){
+  try{localStorage.setItem("mo_sync_queue",JSON.stringify(syncQueue));}catch(e){}
+}
+function flushSyncQueue(){
+  if(!BACKUP_URL||!navigator.onLine||syncQueue.length===0)return;
+  const item=syncQueue[0];
+  fetch(BACKUP_URL,{
+    method:"POST",mode:"no-cors",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(item.payload)
+  }).then(function(){
+    syncQueue.shift();persistQueue();updateBackupBadge();
+    if(syncQueue.length>0)setTimeout(flushSyncQueue,400);
+  }).catch(function(){updateBackupBadge();});
+}
+window.addEventListener("online",function(){flushSyncQueue();});
+setInterval(flushSyncQueue,30000);
+
+function backupLog(day){
+  if(!BACKUP_URL)return;
+  if(!myRiderName){promptForRiderName();if(!myRiderName)return;}
+  queueSync({type:"log",rider:myRiderName,day:day,log:logs[day]});
+}
+function backupPhoto(day,dataUrl){
+  if(!BACKUP_URL)return;
+  if(!myRiderName){promptForRiderName();if(!myRiderName)return;}
+  queueSync({type:"photo",rider:myRiderName,day:day,dataUrl:dataUrl});
+}
+function backupAudio(day,dataUrl){
+  if(!BACKUP_URL)return;
+  if(!myRiderName){promptForRiderName();if(!myRiderName)return;}
+  queueSync({type:"audio",rider:myRiderName,day:day,dataUrl:dataUrl});
+}
+function backupVideoNote(day,text){
+  if(!BACKUP_URL)return;
+  if(!myRiderName){promptForRiderName();if(!myRiderName)return;}
+  queueSync({type:"videonote",rider:myRiderName,day:day,text:text});
+}
+
+function load(){
+  try{logs=JSON.parse(localStorage.getItem("mo_logs")||"{}")}catch(e){logs={};}
+  try{riders=JSON.parse(localStorage.getItem("mo_riders")||"[]")}catch(e){riders=[];}
+  try{cl=JSON.parse(localStorage.getItem("mo_cl")||"{}")}catch(e){cl={};}
+  try{photos=JSON.parse(localStorage.getItem("mo_photos")||"{}")}catch(e){photos={};}
+  try{audio=JSON.parse(localStorage.getItem("mo_audio")||"{}")}catch(e){audio={};}
+  try{vidNotes=JSON.parse(localStorage.getItem("mo_vid")||"{}")}catch(e){vidNotes={};}
+}
+function save(){
+  try{localStorage.setItem("mo_logs",JSON.stringify(logs))}catch(e){}
+  try{localStorage.setItem("mo_riders",JSON.stringify(riders))}catch(e){}
+  try{localStorage.setItem("mo_cl",JSON.stringify(cl))}catch(e){}
+  try{localStorage.setItem("mo_audio",JSON.stringify(audio))}catch(e){}
+  try{localStorage.setItem("mo_vid",JSON.stringify(vidNotes))}catch(e){}
+  try{localStorage.setItem("mo_photos",JSON.stringify(photos))}catch(e){showToast("Storage full, export backup and clear old photos");}
+}
+load();
+
+function updateOnline(){
+  const p=document.getElementById("opill"),t=document.getElementById("otxt");
+  const on=navigator.onLine;
+  p.className="online-pill "+(on?"live":"offline");
+  t.textContent=on?"LIVE":"OFFLINE";
+  document.querySelectorAll(".needs-net").forEach(function(el){el.style.display=on?"none":"flex";});
+}
+window.addEventListener("online",updateOnline);
+window.addEventListener("offline",updateOnline);
+updateOnline();
+
+function setMode(m){
+  curMode=m;
+  document.getElementById("btnM").className="mbtn morning"+(m==="morning"?" on":"");
+  document.getElementById("btnE").className="mbtn evening"+(m==="evening"?" on":"");
+  document.getElementById("mpanel").className="mpanel"+(m==="morning"?" active":"");
+  document.getElementById("epanel").className="epanel"+(m==="evening"?" active":"");
+  document.getElementById("mlabel").textContent=m==="morning"?"Morning - weather and kit check":"Evening - log your ride and experiences";
+  if(m==="morning")renderMPreview();
+}
+
+function buildTape(){
+  const tape=document.getElementById("tape");tape.innerHTML="";
+  ROUTE.forEach(function(r){
+    const hp=(photos[r.day]||[]).length;
+    const c=document.createElement("div");
+    c.className="dchip"+(r.day===curDay?" active":"")+(logs[r.day]?" logged":"")+(hp?" hasphotos":"");
+    c.innerHTML="<span class=\"cnum\">D"+r.day+"</span><span class=\"cicon\">"+r.icon+"</span><span class=\"ckm\">"+(r.km?r.km+"km":"Rest")+"</span>";
+    c.onclick=function(){selDay(r.day);};
+    tape.appendChild(c);
+  });
+}
+function selDay(d){
+  curDay=d;buildTape();renderHero();loadForm();renderRouteList();renderStats();
+  renderMemoirEntries();renderPhotos();renderAudio();renderVidNotes();
+  renderInsights();renderDayRatings();checkAch();updateLB();
+  document.getElementById("wdtitle").textContent=ROUTE[d-1].dest+" - Day "+d;
+  if(curMode==="morning")renderMPreview();
+}
+function renderHero(){
+  const r=ROUTE[curDay-1];
+  let html="";
+  html+="<div class=\"hlabel\">Day "+r.day+" of 15 - The Great Mongol Odyssey</div>";
+  html+="<div class=\"htitle\">"+r.icon+" "+r.dest+"</div>";
+  html+="<div class=\"hbadges\">";
+  html+= r.km ? "<span class=\"badge bkm\">📍 "+r.km+" KM</span>" : "<span class=\"badge bkm\">🏨 Rest Day</span>";
+  html+="<span class=\"badge bterr\">"+r.terrain+"</span>";
+  if(r.type==="offroad")html+="<span class=\"badge bwarn\">⚠️ Off Road</span>";
+  if(r.day===8||r.day===10)html+="<span class=\"badge bwarn\">⛰️ High Altitude</span>";
+  if(logs[r.day])html+="<span class=\"badge bterr\">✅ Logged</span>";
+  html+="</div>";
+  html+="<div class=\"hdesc\">"+r.desc+"</div>";
+  document.getElementById("hero").innerHTML=html;
+}
+function renderMPreview(){
+  const r=ROUTE[curDay-1];
+  let html="<div style=\"font-family:'Oswald',sans-serif;font-size:14px;color:var(--sand);margin-bottom:5px;\">Day "+r.day+" - "+r.dest+"</div>";
+  html+="<div style=\"font-size:12px;color:var(--mist);line-height:1.65;margin-bottom:7px;\">"+r.desc+"</div>";
+  if(r.km){
+    html+="<div style=\"font-size:12px;color:var(--snow);\">📍 <strong>"+r.km+"km</strong> &nbsp; 🏔️ "+r.terrain+"</div>";
+  } else {
+    html+="<div style=\"font-size:12px;color:var(--mist);\">Rest / Arrival day</div>";
+  }
+  document.getElementById("mpreview").innerHTML=html;
+}
+function showPrevBriefing(){
+  const log=logs[curDay>1?curDay-1:curDay];
+  const txt=(log&&log.briefing)?log.briefing:"No briefing saved. Generate one from the log tab.";
+  openModal("Yesterdays Briefing","<div style=\"font-size:13px;color:var(--snow);line-height:1.75;white-space:pre-wrap;\">"+txt+"</div>");
+}
+
+function handlePhotos(e){
+  Array.prototype.forEach.call(e.target.files,function(f){addPhoto(f);});
+  e.target.value="";
+}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById("pzone").classList.remove("drag");
+  Array.prototype.forEach.call(e.dataTransfer.files,function(f){
+    if(f.type.indexOf("image/")===0)addPhoto(f);
+  });
+}
+function addPhoto(f){
+  if(f.size>5*1024*1024){showToast("Photo over 5MB, try a lower resolution");return;}
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement("canvas");
+      const MAX=1100;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext("2d").drawImage(img,0,0,w,h);
+      const comp=canvas.toDataURL("image/jpeg",0.72);
+      if(!photos[curDay])photos[curDay]=[];
+      photos[curDay].push({data:comp,name:f.name,ts:Date.now()});
+      save();renderPhotos();buildTape();showToast("Photo added");
+      backupPhoto(curDay,comp);
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+function renderPhotos(){
+  const items=photos[curDay]||[];
+  let html="";
+  for(let i=0;i<items.length;i++){
+    const p=items[i];
+    html+="<div class=\"pitem\"><img src=\""+p.data+"\" onclick=\"viewPhoto("+curDay+","+i+")\">";
+    html+="<div class=\"pcap\">"+p.name+"</div>";
+    html+="<button class=\"pdel\" onclick=\"delPhoto("+i+")\">✕</button></div>";
+  }
+  document.getElementById("pgrid").innerHTML=html;
+}
+function viewPhoto(day,i){
+  const p=photos[day][i];
+  openModal("Photo","<img src=\""+p.data+"\" style=\"width:100%;border-radius:8px;\">");
+}
+function delPhoto(i){photos[curDay].splice(i,1);save();renderPhotos();buildTape();}
+
+function toggleRec(){
+  const btn=document.getElementById("recBtn"),timer=document.getElementById("recTimer");
+  if(!mr||mr.state==="inactive"){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+      mr=new MediaRecorder(stream);rc=[];
+      mr.ondataavailable=function(e){rc.push(e.data);};
+      mr.onstop=function(){
+        const blob=new Blob(rc,{type:"audio/webm"});
+        const reader=new FileReader();
+        reader.onload=function(ev){
+          if(!audio[curDay])audio[curDay]=[];
+          audio[curDay].push({data:ev.target.result,dur:rs,ts:Date.now()});
+          save();renderAudio();showToast("Voice memo saved");
+          backupAudio(curDay,ev.target.result);
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(function(t){t.stop();});
+      };
+      mr.start();rs=0;
+      ri=setInterval(function(){rs++;timer.textContent="⏺ "+rs+"s";},1000);
+      btn.className="recbtn rec";btn.innerHTML="⏹ Stop";timer.style.display="flex";
+    }).catch(function(){showToast("Microphone access denied");});
+  } else {
+    mr.stop();clearInterval(ri);
+    btn.className="recbtn idle";btn.innerHTML="🎙️ Voice Memo";timer.style.display="none";
+  }
+}
+function renderAudio(){
+  const items=audio[curDay]||[];
+  let html="";
+  for(let i=0;i<items.length;i++){
+    const a=items[i];
+    html+="<div class=\"arow\"><span style=\"font-size:13px;\">🎙️</span><audio controls src=\""+a.data+"\"></audio>";
+    html+="<span style=\"font-size:10px;color:var(--mist);\">"+a.dur+"s</span>";
+    html+="<button class=\"adel\" onclick=\"delAudio("+i+")\">✕</button></div>";
+  }
+  document.getElementById("alist").innerHTML=html;
+}
+function delAudio(i){audio[curDay].splice(i,1);save();renderAudio();}
+
+function addVidNote(){
+  const v=document.getElementById("vninput").value.trim();
+  if(!v){showToast("Describe the video first");return;}
+  if(!vidNotes[curDay])vidNotes[curDay]=[];
+  vidNotes[curDay].push({text:v,ts:Date.now()});
+  save();renderVidNotes();
+  document.getElementById("vninput").value="";
+  showToast("Video note logged");
+  backupVideoNote(curDay,v);
+}
+function renderVidNotes(){
+  const items=vidNotes[curDay]||[];
+  let html="";
+  for(let i=0;i<items.length;i++){
+    html+="<div class=\"vitem\"><span style=\"font-size:18px;\">🎬</span>";
+    html+="<span style=\"font-size:12px;color:var(--snow);flex:1;line-height:1.5;\">"+items[i].text+"</span>";
+    html+="<button class=\"vdel\" onclick=\"delVN("+i+")\">✕</button></div>";
+  }
+  document.getElementById("vnlist").innerHTML=html;
+}
+function delVN(i){vidNotes[curDay].splice(i,1);save();renderVidNotes();}
+
+function loadForm(){
+  const log=logs[curDay];
+  const F=["lKm","lDur","lFuel","lFuelC","lWx","lTemp","lDiff","lFat","lStay","lStayC","lFood","lPpl","lNotes","lIssues","lTips"];
+  const K=["km","dur","fuel","fuelC","wx","temp","diff","fat","stay","stayC","food","ppl","notes","issues","tips"];
+  for(let i=0;i<F.length;i++){
+    const el=document.getElementById(F[i]);
+    if(el)el.value=log?(log[K[i]]||""):"";
+  }
+  selMood=log&&log.mood?log.mood:"";
+  selStars=log&&log.stars?log.stars:0;
+  const moodBtns=document.querySelectorAll(".mbtn2");
+  for(let i=0;i<moodBtns.length;i++)moodBtns[i].classList.toggle("on",moodBtns[i].textContent===selMood);
+  const starBtns=document.querySelectorAll(".sbtn");
+  for(let i=0;i<starBtns.length;i++)starBtns[i].classList.toggle("on",i<selStars);
+  const brf=(log&&log.briefing)?log.briefing:"Save todays log then tap Tomorrows Brief.";
+  document.getElementById("brfTxt").textContent=brf;
+  document.getElementById("brfTxt").className="aitxt"+((log&&log.briefing)?"":" ph");
+  renderPhotos();renderAudio();renderVidNotes();
+}
+function setMood(btn,e){
+  selMood=e;
+  const btns=document.querySelectorAll(".mbtn2");
+  for(let i=0;i<btns.length;i++)btns[i].classList.remove("on");
+  btn.classList.add("on");
+}
+function setStars(n){
+  selStars=n;
+  const btns=document.querySelectorAll(".sbtn");
+  for(let i=0;i<btns.length;i++)btns[i].classList.toggle("on",i<n);
+}
+function g(id){const el=document.getElementById(id);return el?el.value:"";}
+function saveLog(){
+  const ex=logs[curDay]||{};
+  const merged={};
+  for(const k in ex)merged[k]=ex[k];
+  merged.day=curDay;
+  merged.dest=ROUTE[curDay-1].dest;
+  merged.km=g("lKm");merged.dur=g("lDur");merged.fuel=g("lFuel");merged.fuelC=g("lFuelC");
+  merged.wx=g("lWx");merged.temp=g("lTemp");merged.diff=g("lDiff");merged.fat=g("lFat");
+  merged.stay=g("lStay");merged.stayC=g("lStayC");merged.food=g("lFood");merged.ppl=g("lPpl");
+  merged.notes=g("lNotes");merged.issues=g("lIssues");merged.tips=g("lTips");
+  merged.mood=selMood;merged.stars=selStars;merged.savedAt=new Date().toISOString();
+  logs[curDay]=merged;
+  save();buildTape();renderStats();renderInsights();renderDayRatings();checkAch();updateLB();
+  backupLog(curDay);
+  showToast("Day "+curDay+" saved");
+}
+
+function callAI(prompt,spinEl,outEl){
+  if(!navigator.onLine){
+    if(outEl){outEl.textContent="No internet. Connect to use AI features.";outEl.className="aitxt ph";}
+    return Promise.resolve(null);
+  }
+  if(spinEl)spinEl.classList.add("on");
+  return fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+  }).then(function(res){return res.json();}).then(function(data){
+    const txt=(data.content||[]).map(function(c){return c.text||"";}).join("")||"No response.";
+    if(spinEl)spinEl.classList.remove("on");
+    return txt;
+  }).catch(function(){
+    if(spinEl)spinEl.classList.remove("on");
+    return null;
+  });
+}
+
+function genMorningBrief(){
+  const r=ROUTE[curDay-1];const pl=logs[curDay-1];
+  let prompt="Mongolia motorcycle expedition leader. Day "+r.day+" morning brief. ";
+  prompt+="Today: "+r.dest+", "+(r.km||0)+"km, "+r.terrain+". "+r.desc+" ";
+  if(pl){prompt+="Yesterday: "+(pl.km||"unknown")+"km, fatigue "+(pl.fat||"unknown")+", issues "+(pl.issues||"none")+". ";}
+  else{prompt+="First riding day. ";}
+  prompt+="Write a 120 word morning brief: terrain conditions, one safety priority, fuel and water strategy, one thing to look forward to. Expedition language, specific to "+r.dest+".";
+  const el=document.getElementById("mbrfTxt");el.className="aitxt ph";el.textContent="Generating...";
+  callAI(prompt,document.getElementById("mbrfSpin"),el).then(function(res){
+    if(res){el.className="aitxt";el.textContent=res;if(logs[curDay])logs[curDay].morningBrief=res;save();}
+  });
+}
+function genBriefing(){
+  if(curDay>=15){showToast("Final day, no next briefing");return;}
+  const nd=ROUTE[curDay];
+  const r=ROUTE[curDay-1],log=logs[curDay];
+  const vids=(vidNotes[curDay]||[]).map(function(v){return v.text;}).join("; ");
+  let tl="Not logged yet.";
+  if(log){
+    tl=(log.km||"unknown")+"km, "+(log.wx||"unknown")+", difficulty "+(log.diff||"unknown")+", fatigue "+(log.fat||"unknown")+", issues "+(log.issues||"none");
+    if(vids)tl+=", videos: "+vids;
+  }
+  let prompt="Mongolia motorcycle expedition leader. Day "+curDay+" - "+r.dest+". Today: "+tl+". ";
+  prompt+="Tomorrow Day "+nd.day+": "+nd.dest+", "+nd.km+"km, "+nd.terrain+". "+nd.desc+" ";
+  prompt+="Write a 120 word evening briefing for tomorrow: terrain and road conditions, one critical safety note, fuel and water strategy, one exciting thing ahead.";
+  const el=document.getElementById("brfTxt");el.className="aitxt ph";el.textContent="Generating...";
+  callAI(prompt,document.getElementById("brfSpin"),el).then(function(res){
+    if(res){el.className="aitxt";el.textContent=res;if(logs[curDay])logs[curDay].briefing=res;save();}
+  });
+}
+function genMemoir(){
+  const r=ROUTE[curDay-1];
+  const notes=g("lNotes")||(logs[curDay]?logs[curDay].notes:"")||"";
+  if(!notes){showToast("Add some notes first");return;}
+  const log=logs[curDay];
+  const np=(photos[curDay]||[]).length;
+  const na=(audio[curDay]||[]).length;
+  const vids=(vidNotes[curDay]||[]).map(function(v){return v.text;}).join("; ");
+  let prompt="Travel writer crafting a motorcycle expedition memoir. ";
+  prompt+="Day "+r.day+": "+r.dest+" - "+r.km+"km of "+r.terrain+". Place: "+r.desc+" ";
+  prompt+="Rider notes: "+notes+" ";
+  if(log){
+    if(log.wx)prompt+="Weather: "+log.wx+". ";
+    if(log.mood)prompt+="Mood: "+log.mood+". ";
+    if(log.stars)prompt+="Rating: "+log.stars+"/5. ";
+    if(log.ppl)prompt+="People: "+log.ppl+". ";
+    if(log.food)prompt+="Food: "+log.food+". ";
+  }
+  if(np)prompt+="["+np+" photos captured on phone]. ";
+  if(na)prompt+="["+na+" voice memos recorded]. ";
+  if(vids)prompt+="[Videos logged: "+vids+"]. ";
+  prompt+="Write a vivid 180 word diary entry, first person. Capture dust, wind, scale, emotion. One strong sensory detail. One human moment. Reference captured media if mentioned. End with a line making people wish they were there. No title.";
+  callAI(prompt,document.getElementById("mSpin"),null).then(function(res){
+    if(res){
+      if(!logs[curDay])logs[curDay]={day:curDay,dest:r.dest,notes:notes};
+      logs[curDay].memoir=res;save();renderMemoirEntries();switchTab("memoir");showToast("Memoir written");
+      backupLog(curDay);
+    }
+  });
+}
+function renderMemoirEntries(){
+  const container=document.getElementById("mEntries");
+  const logged=Object.values(logs).sort(function(a,b){return a.day-b.day;});
+  if(!logged.length){
+    container.innerHTML="<div style=\"text-align:center;padding:35px 0;color:var(--mist);font-size:13px;\">Log your days in Evening mode, each becomes a memoir chapter.</div>";
+    return;
+  }
+  let html="";
+  for(let idx=0;idx<logged.length;idx++){
+    const log=logged[idx];
+    const r=ROUTE[log.day-1];
+    const ps=(photos[log.day]||[]).slice(0,4);
+    const as=(audio[log.day]||[]).slice(0,2);
+    const vs=(vidNotes[log.day]||[]);
+    html+="<div class=\"card\" style=\"margin-bottom:9px;\">";
+    html+="<div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;\">";
+    html+="<div style=\"font-family:'Oswald',sans-serif;font-size:14px;color:var(--sand);\">Day "+log.day+" - "+(log.dest||r.dest)+"</div>";
+    html+="<span style=\"font-size:17px;\">"+(log.mood||r.icon)+"</span></div>";
+    html+="<div style=\"display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;\">";
+    if(log.km)html+="<span class=\"badge bkm\">📍 "+log.km+"km</span>";
+    if(log.dur)html+="<span class=\"badge bterr\">⏱ "+log.dur+"</span>";
+    if(log.wx)html+="<span class=\"badge bkm\">"+log.wx+"</span>";
+    if(log.stars)html+="<span class=\"badge bterr\">"+"★".repeat(log.stars)+"☆".repeat(5-log.stars)+"</span>";
+    if(log.stay)html+="<span class=\"badge bwarn\">"+log.stay+"</span>";
+    html+="</div>";
+    if(ps.length){
+      html+="<div style=\"display:flex;gap:5px;margin-bottom:7px;flex-wrap:wrap;\">";
+      for(let pi=0;pi<ps.length;pi++){
+        html+="<img src=\""+ps[pi].data+"\" style=\"width:68px;height:52px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:pointer;\" onclick=\"viewPhoto("+log.day+","+pi+")\">";
+      }
+      html+="</div>";
+    }
+    if(as.length){
+      html+="<div style=\"margin-bottom:6px;\">";
+      for(let ai=0;ai<as.length;ai++){html+="<audio controls src=\""+as[ai].data+"\" style=\"width:100%;height:28px;margin-bottom:3px;\"></audio>";}
+      html+="</div>";
+    }
+    if(vs.length){
+      html+="<div style=\"margin-bottom:6px;\">";
+      for(let vi=0;vi<vs.length;vi++){html+="<div style=\"font-size:11px;color:var(--mist);display:flex;align-items:center;gap:5px;padding:2px 0;\">🎬 "+vs[vi].text+"</div>";}
+      html+="</div>";
+    }
+    if(log.notes)html+="<div style=\"font-size:12px;color:var(--mist);line-height:1.6;margin-bottom:6px;padding:7px;background:var(--deep);border-radius:6px;\">"+log.notes+"</div>";
+    if(log.memoir)html+="<div style=\"font-size:13px;color:#C8C0D8;line-height:1.75;padding:10px;background:rgba(90,60,130,.1);border-left:3px solid rgba(150,100,220,.35);border-radius:0 6px 6px 0;font-style:italic;\">"+log.memoir+"</div>";
+    if(!log.memoir)html+="<button class=\"btn bs\" style=\"margin-top:6px;font-size:11px;padding:4px 10px;\" onclick=\"genMemoirFor("+log.day+")\">✨ Write Memoir</button>";
+    html+="</div>";
+  }
+  container.innerHTML=html;
+}
+function genMemoirFor(day){const p=curDay;curDay=day;genMemoir();curDay=p;}
+function genFullMemoir(){
+  const logged=Object.values(logs).filter(function(l){return l.notes||l.memoir;});
+  if(!logged.length){showToast("Log some days first");return;}
+  const sum=logged.map(function(l){return "Day "+l.day+" - "+l.dest+": "+(l.memoir||l.notes||"");}).join(" || ");
+  let prompt="Write a powerful 300 word expedition preface for The Great Mongol Odyssey, a 2200km motorcycle journey across Mongolia. ";
+  prompt+="Days logged: "+sum+" ";
+  prompt+="Voice of the lead rider. Capture the scale of Mongolia, brotherhood of riders, ancient landscape, what riding the steppe truly feels like. Reference specific places. Worthy of a coffee table books first page.";
+  const box=document.getElementById("fullMBox"),el=document.getElementById("fullMTxt");
+  box.style.display="block";el.textContent="Crafting your story...";
+  callAI(prompt,document.getElementById("mSpin"),el).then(function(res){if(res)el.textContent=res;});
+}
+function copyMemoir(){
+  navigator.clipboard.writeText(document.getElementById("fullMTxt").textContent).then(function(){showToast("Copied");});
+}
+function exportMemoir(){
+  const logged=Object.values(logs).sort(function(a,b){return a.day-b.day;});
+  if(!logged.length){showToast("Nothing to export yet");return;}
+  let txt="THE GREAT MONGOL ODYSSEY\n";
+  txt+="Expedition Memoir\nMotoExpedia - 2200KM - 15 Days\n\n";
+  for(let i=0;i<logged.length;i++){
+    const l=logged[i];
+    txt+="=== DAY "+l.day+": "+l.dest+" ===\n";
+    if(l.km)txt+="Distance: "+l.km+"km | Duration: "+(l.dur||"-")+" | Weather: "+(l.wx||"-")+" | Temp: "+(l.temp||"-")+"C\n";
+    if(l.stay)txt+="Stay: "+l.stay+(l.stayC?" | Cost: "+l.stayC+" MNT":"")+"\n";
+    if(l.mood)txt+="Mood: "+l.mood+" | Rating: "+"*".repeat(l.stars||0)+"\n\n";
+    if(l.food)txt+="Food: "+l.food+"\n";
+    if(l.ppl)txt+="People met: "+l.ppl+"\n";
+    const vs=vidNotes[l.day]||[];
+    if(vs.length)txt+="Videos on phone: "+vs.map(function(v){return v.text;}).join(" | ")+"\n";
+    const ac=audio[l.day]?audio[l.day].length:0;
+    if(ac)txt+="Voice memos: "+ac+" recorded\n";
+    const pc=photos[l.day]?photos[l.day].length:0;
+    if(pc)txt+="Photos: "+pc+" stored on this device\n";
+    if(l.issues)txt+="Issues/Hazards: "+l.issues+"\n";
+    txt+="\n";
+    if(l.notes)txt+="Field Notes:\n"+l.notes+"\n\n";
+    if(l.memoir)txt+="Memoir:\n"+l.memoir+"\n\n";
+    if(l.tips)txt+="Tips for Future Riders:\n"+l.tips+"\n\n";
+    txt+="----------\n\n";
+  }
+  dl(txt,"MongolOdyssey_Memoir.txt","text/plain");
+  showToast("Memoir exported");
+}
+
+function exportBackup(){
+  const bk={logs:logs,riders:riders,cl:cl,vidNotes:vidNotes,exportedAt:new Date().toISOString(),version:"3.0"};
+  dl(JSON.stringify(bk,null,2),"MongolOdyssey_Backup.json","application/json");
+  showToast("Backup saved (photos and audio stored on device separately)");
+}
+function importBackup(){
+  const input=document.createElement("input");input.type="file";input.accept=".json";
+  input.onchange=function(e){
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        const d=JSON.parse(ev.target.result);
+        if(d.logs)logs=d.logs;
+        if(d.riders)riders=d.riders;
+        if(d.cl)cl=d.cl;
+        if(d.vidNotes)vidNotes=d.vidNotes;
+        save();init();showToast("Data restored");
+      }catch(e){showToast("Invalid backup file");}
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+  input.click();
+}
+function dl(content,filename,type){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([content],{type:type}));
+  a.download=filename;a.click();
+}
+
+const WMO={0:"Clear Sky",1:"Mainly Clear",2:"Partly Cloudy",3:"Overcast",45:"Fog",51:"Light Drizzle",61:"Light Rain",63:"Rain",65:"Heavy Rain",80:"Showers",95:"Thunderstorm"};
+function wE(c){
+  if(c<=1)return "☀️";if(c===2)return "⛅";if(c===3)return "☁️";
+  if(c<=48)return "🌫️";if(c<=67)return "🌧️";if(c<=77)return "❄️";if(c<=82)return "🌦️";
+  return "⛈️";
+}
+function fetchWeather(){
+  const r=ROUTE[curDay-1];
+  if(!navigator.onLine){
+    document.getElementById("wgrid").innerHTML="<div style=\"text-align:center;padding:20px;color:var(--danger);grid-column:1/-1;font-size:12px;\">No internet, weather requires connectivity</div>";
+    return;
+  }
+  document.getElementById("wgrid").innerHTML="<div style=\"text-align:center;padding:20px;color:var(--mist);font-size:12px;grid-column:1/-1;\">Fetching for "+r.dest+"...</div>";
+  fetch("https://api.open-meteo.com/v1/forecast?latitude="+r.lat+"&longitude="+r.lon+"&daily=weathercode,temperature_2m_max,temperature_2m_min,windspeed_10m_max,precipitation_sum&current_weather=true&timezone=Asia%2FUlaanbaatar&forecast_days=5")
+  .then(function(res){return res.json();})
+  .then(function(data){
+    const labels=["Today","Tomorrow","D+2","D+3","D+4"];
+    let hasAlert=false;
+    for(let i=0;i<data.daily.weathercode.length;i++)if(data.daily.weathercode[i]>=61)hasAlert=true;
+    document.getElementById("walert").className="walert"+(hasAlert?" show":"");
+    document.getElementById("walerttxt").textContent="Storm or rain forecast, adjust departure timing if needed.";
+    let html="";
+    for(let i=0;i<data.daily.time.length;i++){
+      html+="<div class=\"wcard"+(i===0?" today":"")+"\">";
+      html+="<div class=\"wday\">"+(labels[i]||data.daily.time[i])+"</div>";
+      html+="<div class=\"wicon\">"+wE(data.daily.weathercode[i])+"</div>";
+      html+="<div class=\"wtemp\">"+Math.round(data.daily.temperature_2m_max[i])+"° / "+Math.round(data.daily.temperature_2m_min[i])+"°</div>";
+      html+="<div class=\"wdesc\">"+(WMO[data.daily.weathercode[i]]||"Variable")+"</div>";
+      html+="<div class=\"wwind\">💨 "+Math.round(data.daily.windspeed_10m_max[i])+" km/h</div>";
+      if(data.daily.precipitation_sum[i]>0)html+="<div style=\"font-size:10px;color:#6AACE8;margin-top:1px;\">💧 "+data.daily.precipitation_sum[i]+"mm</div>";
+      html+="</div>";
+    }
+    document.getElementById("wgrid").innerHTML=html;
+    document.getElementById("wchip").textContent=wE(data.current_weather.weathercode)+" "+Math.round(data.current_weather.temperature)+"°C";
+    const nd=ROUTE[curDay]||r;const w=data.daily;
+    let rp="Mongolia motorcycle expedition. Tomorrow near "+nd.dest+" ("+nd.km+"km, "+nd.terrain+"): ";
+    rp+="Max "+Math.round(w.temperature_2m_max[1])+"C, Min "+Math.round(w.temperature_2m_min[1])+"C, ";
+    rp+="Wind "+Math.round(w.windspeed_10m_max[1])+"km/h, Rain "+w.precipitation_sum[1]+"mm, "+(WMO[w.weathercode[1]]||"variable")+". ";
+    rp+="Write an 80 word ride risk brief: departure timing, clothing, one go or no-go condition. Direct.";
+    const re=document.getElementById("wxRisk");re.className="aitxt ph";re.textContent="Analyzing...";
+    callAI(rp,document.getElementById("wxSpin"),re).then(function(risk){
+      if(risk){re.className="aitxt";re.textContent=risk;}
+    });
+  }).catch(function(){
+    document.getElementById("wgrid").innerHTML="<div style=\"text-align:center;padding:20px;color:var(--mist);font-size:12px;grid-column:1/-1;\">Could not fetch weather. Check connection.</div>";
+  });
+}
+
+function renderRouteList(){
+  const n=Object.keys(logs).length,pct=Math.round((n/15)*100);
+  document.getElementById("rbar").style.width=pct+"%";
+  document.getElementById("rpct").textContent=pct+"% complete";
+  let html="";
+  for(let i=0;i<ROUTE.length;i++){
+    const r=ROUTE[i];
+    let sub=r.terrain;
+    if(logs[r.day])sub+=" - done";
+    if(photos[r.day]&&photos[r.day].length)sub+=" - "+photos[r.day].length+" photos";
+    if(audio[r.day]&&audio[r.day].length)sub+=" - audio";
+    if(vidNotes[r.day]&&vidNotes[r.day].length)sub+=" - video notes";
+    html+="<div class=\"rrow"+(r.day===curDay?" cur":"")+(logs[r.day]?" done":"")+"\" onclick=\"selDay("+r.day+");switchTab('log');\">";
+    html+="<div class=\"rdnum\">"+r.day+"</div>";
+    html+="<div class=\"rinfo\"><div class=\"rdest\">"+r.icon+" "+r.dest+"</div><div class=\"rsub\">"+sub+"</div></div>";
+    html+="<div class=\"rkm\">"+(r.km?r.km+"km":"-")+"</div></div>";
+  }
+  document.getElementById("rlist").innerHTML=html;
+}
+
+const SYMS=[{i:"🔊",l:"Noise"},{i:"💨",l:"Overheating"},{i:"⛽",l:"Fuel Issue"},{i:"💡",l:"Electrics"},{i:"🛞",l:"Flat Tyre"},{i:"🔴",l:"Brakes"},{i:"💧",l:"Fluid Leak"},{i:"🏎️",l:"No Start"},{i:"📉",l:"Power Loss"},{i:"🔗",l:"Chain"},{i:"💨",l:"Smoke"},{i:"🌡️",l:"Temp Light"}];
+let selSyms=[];
+function buildSymGrid(){
+  let html="";
+  for(let i=0;i<SYMS.length;i++){
+    html+="<div class=\"symbtn\" onclick=\"togSym("+i+",this)\"><span class=\"symicon\">"+SYMS[i].i+"</span>"+SYMS[i].l+"</div>";
+  }
+  document.getElementById("symgrid").innerHTML=html;
+}
+function togSym(i,el){
+  el.classList.toggle("on");
+  const s=SYMS[i].l;
+  const idx=selSyms.indexOf(s);
+  if(idx>=0)selSyms.splice(idx,1);else selSyms.push(s);
+  if(selSyms.length)document.getElementById("mechInput").value=selSyms.join(", ")+". ";
+}
+function clearMech(){
+  selSyms=[];
+  const btns=document.querySelectorAll(".symbtn");
+  for(let i=0;i<btns.length;i++)btns[i].classList.remove("on");
+  document.getElementById("mechInput").value="";
+  document.getElementById("mechResult").style.display="none";
+}
+function getMechAdvice(){
+  const prob=document.getElementById("mechInput").value;
+  if(!prob.trim()){showToast("Describe the problem");return;}
+  const r=ROUTE[curDay-1];
+  let prompt="Expert Mongolia motorcycle field mechanic. Day "+curDay+", near "+r.dest+", remote steppe. ";
+  prompt+="Problem: "+prob+" ";
+  prompt+="Give: 1 most likely cause(s), 2 step by step field diagnosis, 3 field fix with basic tools, 4 safe to continue riding yes/no/caution, 5 one critical warning sign to watch. ";
+  prompt+="Tools available: basic kit, cable ties, duct tape, spare fuel, basic spares. Max 220 words.";
+  const res=document.getElementById("mechResult"),el=document.getElementById("mechTxt");
+  res.style.display="block";el.textContent="Diagnosing...";
+  callAI(prompt,document.getElementById("mechSpin"),el).then(function(txt){if(txt)el.textContent=txt;});
+}
+function buildSpares(){
+  const sp=[{i:"🔧",n:"Tyre repair kit plus pump",c:true},{i:"⛽",n:"Spare fuel can 10L",c:true},{i:"💡",n:"Fuses plus spare bulbs",c:true},{i:"🔗",n:"Chain links plus lube",c:true},{i:"🧰",n:"Cable ties plus duct tape",c:false},{i:"🔩",n:"Spark plugs x2",c:false},{i:"🧴",n:"Engine oil 1L",c:false},{i:"🪛",n:"Multi-tool plus spanners",c:false}];
+  let html="";
+  for(let i=0;i<sp.length;i++){
+    const s=sp[i];
+    html+="<div style=\"display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:5px;\">";
+    html+="<span style=\"font-size:16px;\">"+s.i+"</span><div style=\"flex:1;\"><div style=\"font-size:13px;color:var(--snow);\">"+s.n+"</div>";
+    html+="<div style=\"font-size:10px;"+(s.c?"color:var(--danger)":"color:var(--mist)")+";\">"+(s.c?"Critical spare":"Recommended")+"</div></div></div>";
+  }
+  document.getElementById("spares").innerHTML=html;
+}
+
+const PHRASES=[
+  {cat:"Navigation",ph:[
+    {e:"Where is petrol station?",m:"Бензин хаана байна?",p:"Ben-zin kha-na BAY-na?"},
+    {e:"How far to next town?",m:"Хэд километр вэ?",p:"Hed kilo-metr ve?"},
+    {e:"We are lost",m:"Бид төөрчихлөө",p:"Bid toe-ri-kh-LOO"},
+    {e:"Is road ahead bad?",m:"Урдаа зам муу юу?",p:"Or-da zam moo yoo?"},
+    {e:"Which direction?",m:"Аль зам вэ?",p:"Al zam ve?"},
+    {e:"Can you help us?",m:"Та бидэнд туслах уу?",p:"Ta bi-dend toos-lakh oo?"}
+  ]},
+  {cat:"Fuel and Repair",ph:[
+    {e:"Fill it up",m:"Дүүргэж өгнө үү",p:"Du-rgej ognu u"},
+    {e:"Petrol / Diesel",m:"Бензин / Дизель",p:"Ben-zin / Di-zel"},
+    {e:"Is there a mechanic?",m:"Механик байна уу?",p:"Me-khan-ik bay-na oo?"},
+    {e:"My bike is broken",m:"Мотоцикл эвдэрлээ",p:"Moto-tsikl ev-der-lee"},
+    {e:"I need water",m:"Надад ус хэрэгтэй",p:"Na-dad us khe-reg-tey"},
+    {e:"How much cost?",m:"Хэд вэ?",p:"Hed ve?"}
+  ]},
+  {cat:"Camp and Food",ph:[
+    {e:"Can we camp here?",m:"Энд байрлаж болох уу?",p:"End bayr-laj bo-lokh oo?"},
+    {e:"Is there a ger camp?",m:"Гэрийн бааз байна уу?",p:"Ge-riin baaz bay-na oo?"},
+    {e:"Thank you very much",m:"Баярлалаа",p:"Ba-yar-la-LAA"},
+    {e:"Delicious!",m:"Амттай!",p:"Am-TTAI!"},
+    {e:"Do you have food?",m:"Хоол байна уу?",p:"Khool bay-na oo?"},
+    {e:"Vegetarian food?",m:"Махгүй хоол байна уу?",p:"Makh-gui khool bay-na oo?"}
+  ]},
+  {cat:"Emergency",ph:[
+    {e:"Help! Emergency!",m:"Тусалаарай! Яаралтай!",p:"Too-sa-LAA-rai! Ya-ral-tai!"},
+    {e:"Need doctor",m:"Эмч хэрэгтэй",p:"Emch khe-reg-tey"},
+    {e:"Call 103",m:"103 дугаар залгаарай",p:"103 dug-aar zal-GAA-rai"},
+    {e:"Accident happened",m:"Осол гарлаа",p:"O-sol gar-LAA"},
+    {e:"I am injured",m:"Би гэмтсэн",p:"Bi gem-tsen"},
+    {e:"Where is hospital?",m:"Эмнэлэг хаана?",p:"Em-ne-leg kha-na?"}
+  ]},
+  {cat:"Friendly",ph:[
+    {e:"Hello!",m:"Сайн уу?",p:"Sayn oo?"},
+    {e:"My name is...",m:"Миний нэр...",p:"Mi-nii ner..."},
+    {e:"Beautiful country!",m:"Сайхан улс!",p:"Say-khan uls!"},
+    {e:"We love Mongolia",m:"Монголыг дуртай",p:"Mon-go-lyg doo-rtai"},
+    {e:"You are very kind",m:"Маш сайхан хүн",p:"Mash say-khan khun"},
+    {e:"Goodbye",m:"Баяртай",p:"Ba-yar-TAI"}
+  ]}
+];
+function buildPhrases(){
+  let tabs="";
+  for(let i=0;i<PHRASES.length;i++){
+    tabs+="<button class=\"pctab"+(i===activePC?" on":"")+"\" onclick=\"setPC("+i+")\">"+PHRASES[i].cat+"</button>";
+  }
+  document.getElementById("pctabs").innerHTML=tabs;
+  let html="<div class=\"pgrid2\">";
+  const list=PHRASES[activePC].ph;
+  for(let i=0;i<list.length;i++){
+    const p=list[i];
+    html+="<div class=\"pcard\" onclick=\"copyP("+activePC+","+i+",this)\"><div class=\"pen\">"+p.e+"</div><div class=\"pmn\">"+p.m+"</div><div class=\"pph\">"+p.p+"</div></div>";
+  }
+  html+="</div>";
+  document.getElementById("pcontent").innerHTML=html;
+}
+function setPC(i){activePC=i;buildPhrases();}
+function copyP(cat,idx,el){
+  const text=PHRASES[cat].ph[idx].m;
+  navigator.clipboard.writeText(text).catch(function(){});
+  el.style.borderColor="var(--sand)";
+  setTimeout(function(){el.style.borderColor="";},800);
+  showToast("Copied");
+}
+function genPhrase(){
+  const input=document.getElementById("phraseIn").value;
+  if(!input.trim()){showToast("Describe what to say");return;}
+  let prompt="Translate for a motorcycle rider in rural Mongolia: \""+input+"\". ";
+  prompt+="Provide: 1 Mongolian Cyrillic, 2 phonetic pronunciation simple no special characters, 3 one usage tip. Exactly 3 lines.";
+  const out=document.getElementById("phraseOut");
+  out.innerHTML="<div style=\"font-size:11px;color:var(--mist);\">Translating...</div>";
+  callAI(prompt,null,out).then(function(txt){
+    if(txt)out.innerHTML="<div style=\"background:var(--deep);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;line-height:1.75;color:var(--snow);\">"+txt.split("\n").join("<br>")+"</div>";
+  });
+}
+
+function renderStats(){
+  const arr=Object.values(logs);
+  let totKm=0,totFuel=0,totFC=0,totSC=0,ratedCount=0,ratedSum=0;
+  for(let i=0;i<arr.length;i++){
+    totKm+=parseFloat(arr[i].km)||0;
+    totFuel+=parseFloat(arr[i].fuel)||0;
+    totFC+=parseFloat(arr[i].fuelC)||0;
+    totSC+=parseFloat(arr[i].stayC)||0;
+    if(arr[i].stars){ratedCount++;ratedSum+=arr[i].stars;}
+  }
+  const avgR=ratedCount>0?(ratedSum/ratedCount).toFixed(1):"-";
+  const eff=(totFuel>0&&totKm>0)?(totKm/totFuel).toFixed(1):"-";
+  let tp=0,ta=0,tv=0;
+  for(const k in photos)tp+=photos[k].length;
+  for(const k in audio)ta+=audio[k].length;
+  for(const k in vidNotes)tv+=vidNotes[k].length;
+  let html="";
+  html+="<div class=\"scard\"><div class=\"snum\">"+totKm.toFixed(0)+"</div><div class=\"sunit\">KM</div><div class=\"slbl2\">Ridden</div></div>";
+  html+="<div class=\"scard\"><div class=\"snum\">"+arr.length+"</div><div class=\"sunit\">/ 15</div><div class=\"slbl2\">Days Logged</div></div>";
+  html+="<div class=\"scard\"><div class=\"snum\">"+totFuel.toFixed(0)+"</div><div class=\"sunit\">LITRES</div><div class=\"slbl2\">Total Fuel</div></div>";
+  html+="<div class=\"scard\"><div class=\"snum\">"+avgR+"</div><div class=\"sunit\">/ 5 STAR</div><div class=\"slbl2\">Avg Rating</div></div>";
+  html+="<div class=\"scard\"><div class=\"snum\">"+Math.max(0,2200-totKm).toFixed(0)+"</div><div class=\"sunit\">KM LEFT</div><div class=\"slbl2\">Remaining</div></div>";
+  html+="<div class=\"scard\"><div class=\"snum\">"+eff+"</div><div class=\"sunit\">KM/L</div><div class=\"slbl2\">Efficiency</div></div>";
+  html+="<div class=\"scard\"><div class=\"snum\">"+tp+"</div><div class=\"sunit\">PHOTOS</div><div class=\"slbl2\">Captured</div></div>";
+  html+="<div class=\"scard\"><div class=\"snum\">"+(ta+tv)+"</div><div class=\"sunit\">MEMOS</div><div class=\"slbl2\">Voice+Video</div></div>";
+  document.getElementById("sgrid").innerHTML=html;
+
+  if(arr.length>0){
+    let mx=1;
+    for(let i=0;i<arr.length;i++){const km=parseFloat(arr[i].km)||0;if(km>mx)mx=km;}
+    let bars="",lbls="";
+    for(let i=0;i<ROUTE.length;i++){
+      const r=ROUTE[i];const log=logs[r.day];
+      const km=log?(parseFloat(log.km)||0):0;
+      const h=log?Math.max(4,(km/mx)*66):4;
+      bars+="<div title=\"D"+r.day+": "+km+"km\" style=\"flex:1;height:"+h+"px;background:"+(log?"linear-gradient(180deg,var(--ember),var(--sand))":"var(--border)")+";border-radius:3px 3px 0 0;min-width:0;\"></div>";
+      lbls+="<div style=\"flex:1;text-align:center;font-size:7px;font-family:'Courier Prime',monospace;color:var(--mist);min-width:0;\">D"+r.day+"</div>";
+    }
+    document.getElementById("kmchart").innerHTML="<div style=\"display:flex;align-items:flex-end;gap:3px;height:70px;\">"+bars+"</div><div style=\"display:flex;gap:3px;margin-top:3px;\">"+lbls+"</div>";
+  } else {
+    document.getElementById("kmchart").innerHTML="<div style=\"text-align:center;padding:16px;color:var(--mist);font-size:12px;\">Log rides to see chart</div>";
+  }
+
+  let moodHtml="";
+  for(let i=0;i<ROUTE.length;i++){
+    const r=ROUTE[i];const log=logs[r.day];
+    moodHtml+="<div title=\"Day "+r.day+"\" style=\"width:30px;height:30px;border-radius:6px;background:var(--card);border:1px solid "+(log?"var(--sand-dim)":"var(--border)")+";display:flex;align-items:center;justify-content:center;font-size:14px;\">"+(log?(log.mood||r.icon):"·")+"</div>";
+  }
+  document.getElementById("moodline").innerHTML=moodHtml;
+
+  const tot=totFC+totSC;
+  if(tot>0){
+    const fcPct=(totFC/tot*100).toFixed(0),scPct=(totSC/tot*100).toFixed(0);
+    let sHtml="<div style=\"display:flex;gap:10px;flex-wrap:wrap;margin-bottom:9px;\">";
+    sHtml+="<div style=\"flex:1;min-width:105px;\"><div style=\"font-size:10px;color:var(--mist);margin-bottom:3px;\">⛽ Fuel</div><div class=\"bwrap\"><div class=\"bfill\" style=\"width:"+fcPct+"%\"></div></div><div style=\"font-size:12px;color:var(--snow);margin-top:2px;\">"+totFC.toLocaleString()+" MNT</div></div>";
+    sHtml+="<div style=\"flex:1;min-width:105px;\"><div style=\"font-size:10px;color:var(--mist);margin-bottom:3px;\">🏨 Stay</div><div class=\"bwrap\"><div class=\"bfill\" style=\"width:"+scPct+"%;background:linear-gradient(90deg,var(--purple),var(--teal))\"></div></div><div style=\"font-size:12px;color:var(--snow);margin-top:2px;\">"+totSC.toLocaleString()+" MNT</div></div>";
+    sHtml+="</div><div style=\"font-size:14px;color:var(--sand);font-family:'Oswald',sans-serif;\">Total: "+tot.toLocaleString()+" MNT ~ $"+(tot/3400).toFixed(0)+" USD</div>";
+    document.getElementById("spend").innerHTML=sHtml;
+  } else {
+    document.getElementById("spend").innerHTML="<div style=\"color:var(--mist);font-size:12px;\">Log fuel and stay costs to see breakdown</div>";
+  }
+}
+
+function renderInsights(){
+  const arr=Object.values(logs).sort(function(a,b){return (b.stars||0)-(a.stars||0);});
+  const best=arr[0];
+  let totKm=0,hardDays=0;
+  const allArr=Object.values(logs);
+  for(let i=0;i<allArr.length;i++){
+    totKm+=parseFloat(allArr[i].km)||0;
+    if(allArr[i].diff&&(allArr[i].diff.indexOf("4")>=0||allArr[i].diff.indexOf("5")>=0))hardDays++;
+  }
+  let mediaTotal=0;
+  for(const k in photos)mediaTotal+=photos[k].length;
+  for(const k in audio)mediaTotal+=audio[k].length;
+  for(const k in vidNotes)mediaTotal+=vidNotes[k].length;
+  let html="";
+  html+="<div class=\"icard\"><div class=\"ititle\">BEST RATED DAY</div><div class=\"ival\">"+(best?"Day "+best.day:"-")+"</div><div class=\"isub\">"+(best?best.dest+" - "+"★".repeat(best.stars||0):"Log days to see")+"</div></div>";
+  html+="<div class=\"icard\"><div class=\"ititle\">HARDEST TERRAIN</div><div class=\"ival\">"+hardDays+" days</div><div class=\"isub\">Rated difficulty 4-5/5</div></div>";
+  html+="<div class=\"icard\"><div class=\"ititle\">KM LOGGED</div><div class=\"ival\">"+totKm.toFixed(0)+"</div><div class=\"isub\">of 2200km planned</div></div>";
+  html+="<div class=\"icard\"><div class=\"ititle\">MEDIA CAPTURED</div><div class=\"ival\">"+mediaTotal+"</div><div class=\"isub\">Photos + voice + video notes</div></div>";
+  document.getElementById("igrid").innerHTML=html;
+}
+function renderDayRatings(){
+  const arr=Object.values(logs).sort(function(a,b){return a.day-b.day;});
+  if(!arr.length){document.getElementById("dratings").innerHTML="<div style=\"color:var(--mist);font-size:12px;\">Log days to see ratings</div>";return;}
+  let html="";
+  for(let i=0;i<arr.length;i++){
+    const l=arr[i];
+    html+="<div style=\"display:flex;align-items:center;gap:8px;margin-bottom:7px;\"><div style=\"font-family:'Oswald',sans-serif;font-size:12px;color:var(--sand);min-width:50px;\">Day "+l.day+"</div>";
+    html+="<div style=\"flex:1;\"><div style=\"font-size:11px;color:var(--snow);\">"+l.dest+"</div><div class=\"bwrap\" style=\"margin-top:2px;\"><div class=\"bfill\" style=\"width:"+((l.stars||0)*20)+"%\"></div></div></div>";
+    html+="<div style=\"font-size:11px;color:var(--mist);\">"+(l.stars||0)+"/5 "+(l.mood||"")+"</div></div>";
+  }
+  document.getElementById("dratings").innerHTML=html;
+}
+function genTourReport(){
+  const arr=Object.values(logs).sort(function(a,b){return a.day-b.day;});
+  if(arr.length<2){showToast("Log 2+ days first");return;}
+  let sum="";
+  for(let i=0;i<arr.length;i++){
+    const l=arr[i];
+    sum+="Day "+l.day+" "+l.dest+": "+(l.km||"unknown")+"km, diff "+(l.diff||"unknown")+", weather "+(l.wx||"unknown")+", stay "+(l.stay||"unknown")+", cost "+((parseFloat(l.stayC||0)+parseFloat(l.fuelC||0)).toFixed(0))+" MNT, rating "+(l.stars||"unknown")+"/5, tips: "+(l.tips||"none")+". ";
+  }
+  let prompt="Professional adventure motorcycle tour operator. Commercial route assessment for The Great Mongol Odyssey, 2200km across Mongolia. ";
+  prompt+="Real expedition data: "+sum+" ";
+  prompt+="Write a 260 word report covering: 1 overall route assessment, 2 difficulty by section, 3 per-rider budget estimate in USD, 4 best operating months, 5 top 3 marketable highlights, 6 logistics for fuel and accommodation, 7 required client fitness level.";
+  const el=document.getElementById("tourTxt");el.className="aitxt ph";el.textContent="Generating...";
+  callAI(prompt,document.getElementById("tourSpin"),el).then(function(res){
+    if(res){el.className="aitxt";el.textContent=res;}
+  });
+}
+function exportTour(){
+  const c=document.getElementById("tourTxt").textContent;
+  if(c.indexOf("Log")===0){showToast("Generate report first");return;}
+  dl(c,"TourReport.txt","text/plain");
+}
+function buildFuelStops(){
+  const stops=[
+    {d:2,n:"Zorgol Khairkhan",t:"Stock up fully in UB, limited fuel next 2 days"},
+    {d:4,n:"Kharkhorin",t:"Good stop, last reliable station before hot springs"},
+    {d:7,n:"Ikh Tamir",t:"Fill in Tsetserleg, carry 10L reserve for north"},
+    {d:9,n:"Shine Ider",t:"Fuel very scarce, carry maximum reserve here"},
+    {d:10,n:"Khovsgol Lake",t:"Moron city is main fuel hub for northern section"},
+    {d:13,n:"Ogii Lake",t:"Stock up well for final 2-day run back to UB"}
+  ];
+  let html="";
+  for(let i=0;i<stops.length;i++){
+    const s=stops[i];
+    html+="<div style=\"display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--card);border:1px solid var(--border);border-radius:7px;margin-bottom:5px;\"><span style=\"font-size:16px;\">⛽</span>";
+    html+="<div style=\"flex:1;\"><div style=\"font-size:13px;color:var(--snow);\">Day "+s.d+" - "+s.n+"</div><div style=\"font-size:10px;color:var(--mist);\">"+s.t+"</div></div></div>";
+  }
+  document.getElementById("fstops").innerHTML=html;
+}
+
+function addRider(){
+  const n=document.getElementById("riderIn").value.trim();
+  if(!n){showToast("Enter a name");return;}
+  for(let i=0;i<riders.length;i++)if(riders[i].name===n){showToast("Already added");return;}
+  riders.push({name:n,pts:0});
+  save();updateLB();
+  document.getElementById("riderIn").value="";
+  showToast(n+" added");
+}
+function updateLB(){
+  if(riders.length){
+    const arr=Object.values(logs);
+    let kmSum=0,starSum=0,fireCt=0,issueCt=0;
+    for(let i=0;i<arr.length;i++){
+      kmSum+=parseFloat(arr[i].km)||0;
+      starSum+=(arr[i].stars||0)*10;
+      if(arr[i].mood==="🔥")fireCt++;
+      if(arr[i].issues)issueCt++;
+    }
+    riders[0].pts=Math.floor(kmSum/10)+starSum+fireCt*5+issueCt*2;
+  }
+  save();
+  const sorted=riders.slice().sort(function(a,b){return b.pts-a.pts;});
+  const rc=["lg","ls","lb","lo"];
+  if(!sorted.length){document.getElementById("leaderboard").innerHTML="<div style=\"color:var(--mist);font-size:12px;\">Add riders to compete</div>";return;}
+  let html="";
+  for(let i=0;i<sorted.length;i++){
+    const r=sorted[i];
+    const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)+"";
+    html+="<div class=\"lidrow\"><div class=\"lrank "+rc[Math.min(i,3)]+"\">"+medal+"</div><div class=\"lname\">"+r.name+"</div><div class=\"lpts\">"+r.pts+"<span style=\"font-size:10px;color:var(--mist);\"> pts</span></div></div>";
+  }
+  document.getElementById("leaderboard").innerHTML=html;
+}
+const ACHS=[
+  {i:"🏁",n:"First Wheel",d:"Log your first day",p:10,c:function(){return Object.keys(logs).length>=1;}},
+  {i:"💪",n:"Halfway Hero",d:"Complete 7 days",p:50,c:function(){return Object.keys(logs).length>=7;}},
+  {i:"🏆",n:"Conqueror",d:"All 15 days logged",p:200,c:function(){return Object.keys(logs).length>=15;}},
+  {i:"🔥",n:"On Fire",d:"Rate a day 5 stars",p:20,c:function(){return Object.values(logs).some(function(l){return l.stars>=5;});}},
+  {i:"📷",n:"Lens Rider",d:"Add 10+ photos",p:30,c:function(){let t=0;for(const k in photos)t+=photos[k].length;return t>=10;}},
+  {i:"🎙️",n:"Voice of Steppe",d:"Record 5 voice memos",p:25,c:function(){let t=0;for(const k in audio)t+=audio[k].length;return t>=5;}},
+  {i:"💎",n:"Blue Pearl",d:"Log Khovsgol Day 10",p:100,c:function(){return !!logs[10];}},
+  {i:"🏛️",n:"Khans Road",d:"Log Karakorum Day 4",p:40,c:function(){return !!logs[4];}},
+  {i:"♨️",n:"Hot Springs",d:"Log hot springs day",p:20,c:function(){return !!logs[6];}},
+  {i:"✍️",n:"Author",d:"Write 5 memoirs",p:60,c:function(){return Object.values(logs).filter(function(l){return l.memoir;}).length>=5;}},
+  {i:"🗣️",n:"Local Connect",d:"Log locals 3 days",p:35,c:function(){return Object.values(logs).filter(function(l){return l.ppl;}).length>=3;}},
+  {i:"💀",n:"Survivor",d:"Log an extreme day 5/5",p:45,c:function(){return Object.values(logs).some(function(l){return l.diff&&l.diff.indexOf("5")>=0;});}}
+];
+function checkAch(){
+  let html="";
+  for(let i=0;i<ACHS.length;i++){
+    const a=ACHS[i];const u=a.c();
+    html+="<div class=\"achcard "+(u?"on":"off")+"\"><div class=\"achicon\">"+a.i+"</div><div class=\"achname\">"+a.n+"</div><div class=\"achdesc\">"+a.d+"</div><div class=\"achpts\">+"+a.p+" pts"+(u?" done":"")+"</div></div>";
+  }
+  document.getElementById("achgrid").innerHTML=html;
+}
+const CHALS=["Get a photo with a local nomad today, with permission","Ride or pet a horse before camp tonight","Drink airag if offered, it is Mongolian tradition","Call a 5 minute group stop for golden hour","Navigate by landmarks only for 20km, no GPS","Learn 3 Mongolian words from a local today","Tonight: one campfire story from each rider","Spot and name the highest peak visible today","Gift something small to the next nomad family","10 minutes stargazing from camp, no phones","First to spot a golden eagle wins, honor system","Full group photo: all riders plus bikes plus landscape","Eat whatever the ger family is cooking, no questions","Name one constellation tonight from camp","Count how many gers you pass, closest guess wins"];
+function newChallenge(){
+  document.getElementById("challenge").textContent=CHALS[Math.floor(Math.random()*CHALS.length)];
+}
+const TRIVS=[
+  {q:"What percent of Mongolias population lives in Ulaanbaatar?",o:["25%","45%","60%","75%"],a:1,f:"About 45% of Mongolias 3.3M people live in UB, one of the worlds most disproportionate capitals."},
+  {q:"How much of the worlds freshwater does Khovsgol Lake hold?",o:["0.5%","1%","2%","5%"],a:2,f:"Khovsgol holds 2% of the worlds surface freshwater, 480.7 cubic km of crystal clear water."},
+  {q:"At its peak, the Mongol Empire was how large?",o:["10M sq km","16M sq km","24M sq km","33M sq km"],a:2,f:"About 24 million square km, the largest contiguous land empire in history."},
+  {q:"Tsagaan Sum hot springs flow at what temperature?",o:["45C","65C","85.5C","98C"],a:2,f:"85.5C year round at 1860m altitude, hot enough to cook noodles."},
+  {q:"The turtle symbol at Karakorum represents?",o:["War and power","Longevity, unity and water spirit","Good harvest","Safe travel"],a:1,f:"Since the 8th century, Mongols revere the turtle for longevity, unity, independence, and spirit of water."},
+  {q:"How many rivers flow INTO Lake Khovsgol?",o:["12","35","About 100","Over 200"],a:2,f:"Nearly 100 rivers flow in, only the Eg River flows out, reaching Baikal 1000km away."},
+  {q:"Karakorum was destroyed by which dynasty in 1380?",o:["Russian Cossacks","Chinese Ming dynasty","Timurid Empire","Ottoman forces"],a:1,f:"Ming dynasty troops destroyed Karakorum, leaving only stone turtles and palace foundations."},
+  {q:"The Mongolian word for the traditional round home is?",o:["Yurt","Ger","Jurte","Iurt"],a:1,f:"In Mongolia it is called ger. Yurt is the Russian/Turkish word."}
+];
+function nextTrivia(){trivI=(trivI+1)%TRIVS.length;trivDone=false;renderTrivia();}
+function renderTrivia(){
+  const t=TRIVS[trivI];
+  document.getElementById("trivQ").textContent="Q"+(trivI+1)+"/8: "+t.q;
+  let html="";
+  for(let i=0;i<t.o.length;i++){
+    html+="<button onclick=\"answerTrivia("+i+")\" style=\"background:var(--deep);border:1px solid var(--border);border-radius:7px;padding:8px 11px;color:var(--snow);font-size:12px;text-align:left;cursor:pointer;width:100%;transition:all .2s;\">"+t.o[i]+"</button>";
+  }
+  document.getElementById("trivOpts").innerHTML=html;
+  document.getElementById("trivFb").style.display="none";
+}
+function answerTrivia(i){
+  if(trivDone)return;trivDone=true;
+  const t=TRIVS[trivI];
+  const btns=document.getElementById("trivOpts").querySelectorAll("button");
+  const ok=i===t.a;
+  btns[i].style.background=ok?"rgba(74,103,65,.3)":"rgba(217,64,64,.2)";
+  btns[i].style.borderColor=ok?"var(--steppe)":"var(--danger)";
+  if(!ok)btns[t.a].style.background="rgba(74,103,65,.3)";
+  const fb=document.getElementById("trivFb");
+  fb.style.display="block";fb.style.color=ok?"#7DBF7A":"var(--danger)";
+  fb.innerHTML=(ok?"Correct! ":"Wrong! ")+t.f;
+  if(ok)showToast("Correct!");
+}
+function genStory(){
+  const r=ROUTE[curDay-1];
+  let prompt="Tell a vivid Mongolian legend or historical story, 150 words, connected to: "+r.dest+". ";
+  prompt+="May involve Genghis Khan, steppe spirits, local mythology, or real history nearby. ";
+  prompt+="Written to read aloud at a campfire under Mongolian stars, slightly mysterious, captivating. ";
+  prompt+="End with one haunting or beautiful final line.";
+  const el=document.getElementById("storyTxt");el.className="aitxt ph";el.textContent="Summoning a legend from the steppe...";
+  callAI(prompt,document.getElementById("storySpin"),el).then(function(res){
+    if(res){el.className="aitxt";el.textContent=res;}
+  });
+}
+
+const CLITEMS=[
+  {cat:"Bike Check",items:["Tyre pressure checked front and rear","Engine oil level OK","Chain lubed and tensioned","Brakes responsive front and rear","All lights working","Fuel tank full","Mirrors adjusted","Luggage secured and balanced"]},
+  {cat:"Rider Gear",items:["Helmet buckled and visor clean","Jacket with all armour in","Gloves on","Boots over ankle","Hi-vis vest packed","Sunglasses or goggles ready"]},
+  {cat:"Essentials",items:["Water minimum 2L per rider","Emergency food bars in pocket","Phone charged over 80%","Offline maps downloaded and checked","First aid kit accessible","Passport copy accessible","Emergency cash MNT and USD","Group rally point agreed for today"]},
+  {cat:"Tools and Safety",items:["Tyre repair kit accessible","Tow rope not buried deep","Jump pack or cables","Satellite communicator on and charged","Signal mirror accessible","Multi-tool on person"]}
+];
+function buildCL(){
+  let html="";
+  for(let ci=0;ci<CLITEMS.length;ci++){
+    const cat=CLITEMS[ci];
+    html+="<div class=\"slabel\">"+cat.cat+"</div>";
+    for(let ii=0;ii<cat.items.length;ii++){
+      const key=ci+"-"+ii,done=cl[key];
+      html+="<div class=\"crow"+(done?" done":"")+"\" onclick=\"togCL('"+key+"',this)\"><div class=\"cbox\">"+(done?"✓":"")+"</div><div style=\"font-size:13px;color:var(--snow);\">"+cat.items[ii]+"</div></div>";
+    }
+  }
+  document.getElementById("clcontent").innerHTML=html;
+}
+function togCL(key,el){
+  cl[key]=!cl[key];
+  el.classList.toggle("done",cl[key]);
+  el.querySelector(".cbox").textContent=cl[key]?"✓":"";
+  save();
+}
+function resetCL(){cl={};save();buildCL();showToast("Reset for today");}
+function checkAll(){
+  for(let ci=0;ci<CLITEMS.length;ci++)for(let ii=0;ii<CLITEMS[ci].items.length;ii++)cl[ci+"-"+ii]=true;
+  save();buildCL();showToast("All clear");
+}
+
+function buildEmergency(){
+  let html="";
+  html+="<div class=\"ecard\"><div class=\"etitle\">📞 Emergency Numbers - Mongolia</div><div class=\"econtent\"><strong>Ambulance / Emergency: 103</strong><br>Police: 102 | Fire: 101<br>SOS Medica UB: +976-11-464-325<br>SOSMED International: +976-9911-0303<br><em style=\"color:var(--mist);\">Save your home countrys embassy number before departure</em></div></div>";
+  html+="<div class=\"ecard\"><div class=\"etitle\">🤕 Rider Down Protocol</div><div class=\"econtent\">1. STOP ALL RIDERS, signal those behind immediately<br>2. Do NOT move rider if spine or neck injury suspected<br>3. Call 103, give GPS coordinates<br>4. Send fastest rider toward nearest settlement<br>5. Keep rider warm, hypothermia risk on steppe<br>6. Never leave rider alone<br>7. Photograph scene for insurance</div></div>";
+  html+="<div class=\"ecard\"><div class=\"etitle\">🌊 River Crossing Protocol</div><div class=\"econtent\">1. Scout depth on foot before entry<br>2. Unbuckle luggage straps before crossing<br>3. Cross one at a time, others watch from bank<br>4. Feet on pegs, never dab in fast current<br>5. If swept, release bike, float feet first downstream<br><em style=\"color:var(--mist);\">Key crossings: Orkhon Day 5, Khovsgol approaches Days 10-11</em></div></div>";
+  html+="<div class=\"ecard\"><div class=\"etitle\">⛈️ Steppe Storm Protocol</div><div class=\"econtent\">1. Stop immediately, visibility drops to zero<br>2. Move bikes 100m off tracks, flash flood risk<br>3. Face bikes away from wind, protect air filters<br>4. Lightning: move away from lone trees and high ground<br><em style=\"color:var(--mist);\">Watch western horizon, most storms arrive from west</em></div></div>";
+  html+="<div class=\"ecard\" style=\"background:rgba(74,103,65,.07);border-color:rgba(74,103,65,.3);\"><div class=\"etitle\" style=\"color:var(--steppe);\">🏠 Mongolian Hospitality (Zochin Buudal)</div><div class=\"econtent\">In ANY emergency, approach the nearest ger. Cultural obligation, you WILL be welcomed, fed, sheltered.<br><br><strong>Тусалаарай!</strong> Help! (Toos-a-LAA-rai)<br><strong>Эмч хэрэгтэй</strong> Need doctor (Emch khe-reg-tey)<br><strong>Осол гарлаа</strong> Accident happened (O-sol gar-LAA)</div></div>";
+  html+="<div style=\"margin-top:11px;\"><div class=\"slabel\" style=\"margin-top:0;\">💾 Data Management</div>";
+  html+="<div class=\"brow\"><button class=\"btn bs\" onclick=\"exportBackup()\">💾 Export Backup</button><button class=\"btn bg\" onclick=\"importBackup()\">📥 Restore Backup</button><button class=\"btn bg\" onclick=\"exportMemoir()\">📤 Export Memoir</button></div>";
+  html+="<div style=\"font-size:11px;color:var(--mist);margin-top:7px;line-height:1.6;\">";
+  html+="<strong style=\"color:var(--sand);\">Where is your data stored?</strong> All logs, notes, memoirs, voice memos and video notes save in this browsers local storage on this device. They persist across sessions unless you clear browser data.<br><br>";
+  html+="<strong style=\"color:var(--sand);\">Photos:</strong> Also stored in local storage. If it fills up, export a backup then delete old photos.<br><br>";
+  html+="<strong style=\"color:var(--sand);\">How to back up:</strong> Tap Export Backup regularly, saves a JSON file to your downloads. Re-open the HTML on any device and tap Restore Backup to load it.<br><br>";
+  html+="<strong style=\"color:var(--sand);\">Videos:</strong> Stay on your phone. Log titles in Video Notes, AI references them in your memoir.</div></div>";
+  document.getElementById("econtent").innerHTML=html;
+}
+function triggerSOS(){
+  const r=ROUTE[curDay-1];
+  let txt="SOS - MOTORCYCLE EXPEDITION\nThe Great Mongol Odyssey (MotoExpedia)\n\n";
+  txt+="Last known area: "+r.dest+" (Day "+curDay+" of 15)\n";
+  txt+="Approx GPS: "+r.lat.toFixed(4)+" N, "+r.lon.toFixed(4)+" E\n";
+  txt+="Google Maps: https://maps.google.com/?q="+r.lat+","+r.lon+"\n\n";
+  txt+="EMERGENCY:\nMongolia Ambulance / Emergency: 103\nPolice: 102\nSOS Medica Ulaanbaatar: +976-11-464-325\n\n";
+  txt+="Expedition: Great Mongol Odyssey, 2200km, MotoExpedia";
+  navigator.clipboard.writeText(txt).then(function(){showToast("SOS info copied, share with emergency contact now");});
+  openModal("SOS Info Copied","<p style=\"font-size:12px;color:var(--mist);margin-bottom:9px;\">Copied to clipboard. Send to someone who can help.</p><pre style=\"font-size:11px;color:var(--snow);line-height:1.7;white-space:pre-wrap;background:var(--deep);padding:9px;border-radius:7px;\">"+txt+"</pre>");
+}
+
+function openModal(title,body){
+  document.getElementById("mtitle").textContent=title;
+  document.getElementById("mbody").innerHTML=body;
+  document.getElementById("moverlay").classList.add("open");
+}
+function closeModal(e){
+  if(e.target===document.getElementById("moverlay"))document.getElementById("moverlay").classList.remove("open");
+}
+function switchTab(tab){
+  const panels=document.querySelectorAll(".panel");
+  for(let i=0;i<panels.length;i++)panels[i].classList.remove("active");
+  const tbtns=document.querySelectorAll(".tbtn");
+  for(let i=0;i<tbtns.length;i++)tbtns[i].classList.remove("active");
+  document.getElementById("panel-"+tab).classList.add("active");
+  const tabs=["log","weather","memoir","route","mechanic","phrases","stats","tour","fun","checklist","emergency"];
+  const i=tabs.indexOf(tab);
+  if(i>=0)tbtns[i].classList.add("active");
+}
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  setTimeout(function(){t.classList.remove("show");},2700);
+}
+
+function init(){
+  buildTape();renderHero();loadForm();renderRouteList();renderMemoirEntries();
+  buildSymGrid();buildSpares();buildPhrases();renderStats();
+  renderInsights();renderDayRatings();buildFuelStops();updateLB();
+  checkAch();buildCL();buildEmergency();newChallenge();renderTrivia();renderMPreview();
+  updateBackupBadge();
+  const urlInput=document.getElementById("backupUrlInput");
+  if(urlInput&&BACKUP_URL)urlInput.value=BACKUP_URL;
+  flushSyncQueue();
+  setTimeout(function(){
+    const t=document.getElementById("tape");
+    const a=t.querySelector(".active");
+    if(a)a.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
+  },100);
+}
+init();
+</script>
+</body>
+</html>
