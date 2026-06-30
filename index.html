@@ -4,6 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Mongol Odyssey HQ v3</title>
+<meta name="description" content="Offline-first ride log for the Mongol Odyssey — weather, AI morning briefs, photo/voice logging, and automatic Google Drive backup for all 6 riders.">
+
+<!-- Open Graph / link preview -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="⚡ Mongol Odyssey HQ">
+<meta property="og:description" content="Offline-first ride log for the Mongol Odyssey — weather, AI morning briefs, photo/voice logging, and automatic Google Drive backup for all 6 riders.">
+<meta property="og:image" content="https://REPLACE-WITH-USERNAME.github.io/REPLACE-WITH-REPO/social-preview.png">
+<meta property="og:url" content="https://REPLACE-WITH-USERNAME.github.io/REPLACE-WITH-REPO/">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="⚡ Mongol Odyssey HQ">
+<meta name="twitter:description" content="Offline-first ride log for the Mongol Odyssey — weather, AI morning briefs, photo/voice logging, and automatic Google Drive backup for all 6 riders.">
+<meta name="twitter:image" content="https://REPLACE-WITH-USERNAME.github.io/REPLACE-WITH-REPO/social-preview.png">
+
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -207,10 +224,12 @@ select option{background:var(--deep);}
   <div class="header-top">
     <div><div class="brand-eyebrow">MotoExpedia · 2200KM · 15 Days</div><div class="brand-name">⚡ MONGOL ODYSSEY HQ</div></div>
     <div class="header-right">
+      <div class="wchip" onclick="showHowToUse()" id="infochip" title="How to use this app">ℹ️ Help</div>
       <div class="wchip" onclick="switchTab('weather');fetchWeather();" id="wchip">🌤️ --°C</div>
       <div class="online-pill live" id="opill"><div class="odot"></div><span id="otxt">LIVE</span></div>
     </div>
   </div>
+  <div style="font-size:11px;color:var(--mist);padding:0 0 6px;line-height:1.5;">Your offline-first companion for the Mongol Odyssey expedition — log each day's ride, get morning briefs and AI memoirs, check weather and kit, and back everything up to a shared Drive folder. Works with no signal; tap ℹ️ Help above for a quick guide.</div>
   <div class="mode-bar">
     <span class="mode-label" id="mlabel">🌅 Morning — weather & kit check</span>
     <div class="mode-toggle">
@@ -1615,6 +1634,28 @@ function triggerSOS(){
   openModal("SOS Info Copied","<p style=\"font-size:12px;color:var(--mist);margin-bottom:9px;\">Copied to clipboard. Send to someone who can help.</p><pre style=\"font-size:11px;color:var(--snow);line-height:1.7;white-space:pre-wrap;background:var(--deep);padding:9px;border-radius:7px;\">"+txt+"</pre>");
 }
 
+function showHowToUse(){
+  const body=
+    "<div style='font-size:13px;line-height:1.7;color:var(--snow);'>"+
+    "<b style='color:var(--sand);'>What this is</b><br>"+
+    "An offline-first trip log for the 6 riders on the Mongol Odyssey. Tracks daily distance, weather, fuel, fatigue, photos, voice memos and a trip memoir — works with zero signal and quietly syncs to a shared Google Drive folder once you're back online.<br><br>"+
+    "<b style='color:var(--sand);'>First time setup (once per phone)</b><br>"+
+    "1. Go to the 🆘 SOS tab → Shared Drive Backup card.<br>"+
+    "2. Tap 👤 Set My Name.<br>"+
+    "3. Paste the Backup Web App URL the trip lead shared with you, tap 💾 Save URL.<br><br>"+
+    "<b style='color:var(--sand);'>Daily use</b><br>"+
+    "🌅 <b>Morning</b> mode: check weather, run your kit checklist, read the AI morning brief.<br>"+
+    "📋 <b>Log</b> tab: fill in km, fuel, stays, notes as the day goes — tap Save Log.<br>"+
+    "🌙 <b>Evening</b> mode: rate the day, add memoir notes, attach a photo or voice memo.<br>"+
+    "🗺️ <b>Route</b>, 🔧 <b>Mechanic</b>, 🗣️ <b>Phrases</b>, 💼 <b>Tour Intel</b>: reference info, all stored offline.<br>"+
+    "📊 <b>Stats</b> and 🎮 <b>Fun</b>: trip progress and rider leaderboard.<br><br>"+
+    "<b style='color:var(--sand);'>Backup</b><br>"+
+    "Every save auto-uploads in the background. No signal? Entries queue and retry automatically. Your device's local copy is never deleted — Drive is a second copy, not a replacement.<br><br>"+
+    "<b style='color:var(--danger);'>🆘 In an emergency</b><br>"+
+    "Open the SOS tab — protocols and GPS copy work with zero signal."+
+    "</div>";
+  openModal("ℹ️ How to Use Mongol Odyssey HQ",body);
+}
 function openModal(title,body){
   document.getElementById("mtitle").textContent=title;
   document.getElementById("mbody").innerHTML=body;
