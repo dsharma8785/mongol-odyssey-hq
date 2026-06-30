@@ -542,6 +542,19 @@ select option{background:var(--deep);}
     <button class="btn bg" style="margin-top:6px;font-size:11px;" onclick="fetchTally()">🔄 Refresh Results</button>
   </div>
 
+  <div class="slabel">🙌 Daily Shoutouts</div>
+  <div class="card" style="margin-bottom:10px;">
+    <div style="font-size:11px;color:var(--mist);line-height:1.6;margin-bottom:9px;">Send a quick praise or thanks to a teammate — totally optional, send as many or as few as you like, any day.</div>
+    <select id="shoutTo" style="width:100%;padding:7px;border-radius:6px;background:var(--deep);border:1px solid var(--border);color:var(--snow);font-size:12px;margin-bottom:7px;"></select>
+    <div class="mode-toggle" style="width:100%;display:flex;margin-bottom:7px;">
+      <button class="mbtn morning on" id="shoutPraiseBtn" onclick="setShoutKind('Praise')" style="flex:1;">🙌 Praise</button>
+      <button class="mbtn evening" id="shoutThanksBtn" onclick="setShoutKind('Thanks')" style="flex:1;">🤝 Thanks</button>
+    </div>
+    <input type="text" id="shoutDetail" maxlength="140" placeholder="What for? (short, e.g. helped fix my chain)" style="width:100%;padding:7px;border-radius:6px;background:var(--deep);border:1px solid var(--border);color:var(--snow);font-size:12px;margin-bottom:9px;">
+    <button class="btn bp" style="width:100%;" onclick="sendShoutout()">📣 Send</button>
+    <div id="shoutFeed" style="margin-top:11px;"></div>
+  </div>
+
   <div class="slabel">🏅 Achievements</div>
   <div class="achgrid" id="achgrid"></div>
   <div class="slabel" style="margin-top:14px;">🎲 Daily Steppe Challenge</div>
@@ -1484,6 +1497,7 @@ function addRider(){
   save();
   document.getElementById("riderIn").value="";
   showToast(n+" added to roster");
+  populateShoutSelect();
 }
 
 const TRAIT_CATS=[
@@ -1543,23 +1557,80 @@ function fetchTally(){
   fetch(BACKUP_URL+"?action=tally")
   .then(function(res){return res.json();})
   .then(function(data){
-    if(!data.ok||!data.tally){el.innerHTML="<div style='font-size:11px;color:var(--mist);'>No votes yet — be the first!</div>";return;}
+    if(!data.ok){el.innerHTML="<div style='font-size:11px;color:var(--mist);'>No results yet — be the first!</div>";return;}
     let html="";
-    for(let i=0;i<TRAIT_CATS.length;i++){
-      const t=TRAIT_CATS[i];
-      const cat=data.tally[t.key];
+    const allCats=TRAIT_CATS.slice();
+    allCats.push({key:"Most Appreciated",icon:"🙌",desc:"Most praise & thanks received"});
+    for(let i=0;i<allCats.length;i++){
+      const t=allCats[i];
+      const cat=t.key==="Most Appreciated"?(data.shoutoutCounts||{}):((data.tally||{})[t.key]);
       if(!cat||!Object.keys(cat).length){
-        html+="<div class='card' style='padding:9px;margin-bottom:6px;'><span style='font-size:12px;color:var(--mist);'>"+t.icon+" "+t.key+": no votes yet</span></div>";
+        html+="<div class='card' style='padding:9px;margin-bottom:6px;'><span style='font-size:12px;color:var(--mist);'>"+t.icon+" "+t.key+": none yet</span></div>";
         continue;
       }
       let top=[],max=0;
       for(const name in cat){if(cat[name]>max)max=cat[name];}
       for(const name in cat){if(cat[name]===max)top.push(name);}
-      html+="<div class='card' style='padding:9px;margin-bottom:6px;'><span style='font-size:12px;color:var(--sand);'>"+t.icon+" "+t.key+":</span> <span style='font-size:13px;color:var(--snow);font-weight:600;'>"+top.join(" & ")+"</span> <span style='font-size:10px;color:var(--mist);'>("+max+" vote"+(max>1?"s":"")+")</span></div>";
+      const unit=t.key==="Most Appreciated"?(max>1?"shoutouts":"shoutout"):(max>1?"votes":"vote");
+      html+="<div class='card' style='padding:9px;margin-bottom:6px;'><span style='font-size:12px;color:var(--sand);'>"+t.icon+" "+t.key+":</span> <span style='font-size:13px;color:var(--snow);font-weight:600;'>"+top.join(" & ")+"</span> <span style='font-size:10px;color:var(--mist);'>("+max+" "+unit+")</span></div>";
     }
     el.innerHTML=html;
   })
   .catch(function(){el.innerHTML="<div style='font-size:11px;color:var(--mist);'>Could not load results. Try again later.</div>";});
+  fetchShoutFeed();
+}
+
+let curShoutKind="Praise";
+function setShoutKind(k){
+  curShoutKind=k;
+  document.getElementById("shoutPraiseBtn").classList.toggle("on",k==="Praise");
+  document.getElementById("shoutThanksBtn").classList.toggle("on",k==="Thanks");
+}
+function populateShoutSelect(){
+  const sel=document.getElementById("shoutTo");
+  if(!sel)return;
+  let html="";
+  for(let i=0;i<riders.length;i++){
+    if(riders[i].name===myRiderName)continue;
+    html+="<option value='"+riders[i].name+"'>"+riders[i].name+"</option>";
+  }
+  sel.innerHTML=html||"<option value=''>Add riders to roster first</option>";
+}
+function sendShoutout(){
+  if(!myRiderName){promptForRiderName();if(!myRiderName){showToast("Set your name first");return;}}
+  const to=document.getElementById("shoutTo").value;
+  if(!to){showToast("Pick who it's for");return;}
+  const detail=document.getElementById("shoutDetail").value.trim();
+  const payload={type:"shoutout",day:curDay,from:myRiderName,to:to,kind:curShoutKind,detail:detail};
+  if(BACKUP_URL&&navigator.onLine){
+    fetch(BACKUP_URL,{method:"POST",body:JSON.stringify(payload)}).then(function(){
+      showToast("Sent to "+to+"!");document.getElementById("shoutDetail").value="";fetchShoutFeed();
+    }).catch(function(){
+      syncQueue.push(payload);localStorage.setItem("mo_sync_queue",JSON.stringify(syncQueue));
+      showToast("Queued, will send when online");document.getElementById("shoutDetail").value="";
+    });
+  }else{
+    syncQueue.push(payload);localStorage.setItem("mo_sync_queue",JSON.stringify(syncQueue));
+    showToast(BACKUP_URL?"Queued, will send when online":"Set a Backup URL first to send");
+    if(BACKUP_URL)document.getElementById("shoutDetail").value="";
+  }
+}
+function fetchShoutFeed(){
+  const el=document.getElementById("shoutFeed");
+  if(!el||!BACKUP_URL||!navigator.onLine)return;
+  fetch(BACKUP_URL+"?action=shoutoutFeed")
+  .then(function(res){return res.json();})
+  .then(function(data){
+    if(!data.ok||!data.feed||!data.feed.length){el.innerHTML="<div style='font-size:11px;color:var(--mist);'>No shoutouts yet — send the first one!</div>";return;}
+    let html="<div class='slabel' style='margin-top:0;'>Recent</div>";
+    for(let i=0;i<data.feed.length;i++){
+      const s=data.feed[i];
+      const icon=s.kind==="Thanks"?"🤝":"🙌";
+      html+="<div style='font-size:12px;color:var(--snow);padding:6px 0;border-bottom:1px solid var(--border);'>"+icon+" <b style='color:var(--sand);'>"+s.from+"</b> to <b style='color:var(--sand);'>"+s.to+"</b>"+(s.detail?" — "+s.detail:"")+"</div>";
+    }
+    el.innerHTML=html;
+  })
+  .catch(function(){});
 }
 const ACHS=[
   {i:"🏁",n:"First Wheel",d:"Log your first day",p:10,c:function(){return Object.keys(logs).length>=1;}},
@@ -1727,7 +1798,7 @@ function switchTab(tab){
   const tbtns=document.querySelectorAll(".tbtn");
   for(let i=0;i<tbtns.length;i++)tbtns[i].classList.remove("active");
   document.getElementById("panel-"+tab).classList.add("active");
-  if(tab==="fun")fetchTally();
+  if(tab==="fun"){fetchTally();populateShoutSelect();}
   const tabs=["log","weather","memoir","route","mechanic","phrases","stats","tour","fun","checklist","emergency"];
   const i=tabs.indexOf(tab);
   if(i>=0)tbtns[i].classList.add("active");
