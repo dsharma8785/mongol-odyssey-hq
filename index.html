@@ -528,16 +528,20 @@ select option{background:var(--deep);}
 <!-- FUN -->
 <div class="panel" id="panel-fun">
   <div style="font-family:'Oswald',sans-serif;font-size:17px;color:var(--snow);margin-bottom:3px;">🎮 Camp Night Entertainment</div>
-  <div class="offline-note">📴 Trivia, challenges &amp; leaderboard work offline · AI stories need internet</div>
-  <div class="slabel">🏆 Rider Leaderboard</div>
+  <div class="offline-note">📴 Trivia, challenges &amp; voting work offline · results sync when online</div>
+  <div class="slabel">🏆 Trail Awards</div>
   <div class="card" style="margin-bottom:10px;">
+    <div style="font-size:11px;color:var(--mist);line-height:1.6;margin-bottom:9px;">Totally optional, just for fun — vote for who stands out on each trait. One vote per category, change your mind anytime. Results show as group superlatives, never who voted for whom.</div>
     <div style="display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap;">
-      <input type="text" id="riderIn" placeholder="Rider name" style="flex:1;min-width:90px;">
+      <input type="text" id="riderIn" placeholder="Add rider to roster" style="flex:1;min-width:90px;">
       <button class="btn bs" onclick="addRider()">+ Add</button>
     </div>
-    <div id="leaderboard"></div>
-    <div style="margin-top:7px;font-size:10px;color:var(--mist);">Points: KM÷10 + Rating×10 + 🔥×5 + issues×2</div>
+    <button class="btn bp" style="width:100%;margin-bottom:11px;" onclick="openVoteModal()">🗳️ Rate Your Mates</button>
+    <div id="superlatives"></div>
+    <div style="margin-top:7px;font-size:10px;color:var(--mist);">Tap 🔄 to refresh results after teammates vote</div>
+    <button class="btn bg" style="margin-top:6px;font-size:11px;" onclick="fetchTally()">🔄 Refresh Results</button>
   </div>
+
   <div class="slabel">🏅 Achievements</div>
   <div class="achgrid" id="achgrid"></div>
   <div class="slabel" style="margin-top:14px;">🎲 Daily Steppe Challenge</div>
@@ -747,7 +751,7 @@ function buildTape(){
 function selDay(d){
   curDay=d;buildTape();renderHero();loadForm();renderRouteList();renderStats();
   renderMemoirEntries();renderPhotos();renderAudio();renderVidNotes();
-  renderInsights();renderDayRatings();checkAch();updateLB();
+  renderInsights();renderDayRatings();checkAch();
   document.getElementById("wdtitle").textContent=ROUTE[d-1].dest+" - Day "+d;
   if(curMode==="morning")renderMPreview();
 }
@@ -938,7 +942,7 @@ function saveLog(){
   merged.notes=g("lNotes");merged.issues=g("lIssues");merged.tips=g("lTips");
   merged.mood=selMood;merged.stars=selStars;merged.savedAt=new Date().toISOString();
   logs[curDay]=merged;
-  save();buildTape();renderStats();renderInsights();renderDayRatings();checkAch();updateLB();
+  save();buildTape();renderStats();renderInsights();renderDayRatings();checkAch();
   backupLog(curDay);
   showToast("Day "+curDay+" saved");
 }
@@ -1477,33 +1481,85 @@ function addRider(){
   if(!n){showToast("Enter a name");return;}
   for(let i=0;i<riders.length;i++)if(riders[i].name===n){showToast("Already added");return;}
   riders.push({name:n,pts:0});
-  save();updateLB();
-  document.getElementById("riderIn").value="";
-  showToast(n+" added");
-}
-function updateLB(){
-  if(riders.length){
-    const arr=Object.values(logs);
-    let kmSum=0,starSum=0,fireCt=0,issueCt=0;
-    for(let i=0;i<arr.length;i++){
-      kmSum+=parseFloat(arr[i].km)||0;
-      starSum+=(arr[i].stars||0)*10;
-      if(arr[i].mood==="🔥")fireCt++;
-      if(arr[i].issues)issueCt++;
-    }
-    riders[0].pts=Math.floor(kmSum/10)+starSum+fireCt*5+issueCt*2;
-  }
   save();
-  const sorted=riders.slice().sort(function(a,b){return b.pts-a.pts;});
-  const rc=["lg","ls","lb","lo"];
-  if(!sorted.length){document.getElementById("leaderboard").innerHTML="<div style=\"color:var(--mist);font-size:12px;\">Add riders to compete</div>";return;}
-  let html="";
-  for(let i=0;i<sorted.length;i++){
-    const r=sorted[i];
-    const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)+"";
-    html+="<div class=\"lidrow\"><div class=\"lrank "+rc[Math.min(i,3)]+"\">"+medal+"</div><div class=\"lname\">"+r.name+"</div><div class=\"lpts\">"+r.pts+"<span style=\"font-size:10px;color:var(--mist);\"> pts</span></div></div>";
+  document.getElementById("riderIn").value="";
+  showToast(n+" added to roster");
+}
+
+const TRAIT_CATS=[
+  {key:"Endurance",icon:"💪",desc:"Keeps going no matter how tough the day gets"},
+  {key:"Riding Etiquette",icon:"🏍️",desc:"Rides safe, considerate, looks out for the group"},
+  {key:"Team Spirit",icon:"🤝",desc:"Always pitching in, keeping the group together"},
+  {key:"Friendliest",icon:"😊",desc:"Warmest, easiest to talk to"},
+  {key:"Funniest",icon:"😂",desc:"Brings the laughs at camp"},
+  {key:"Trip MVP",icon:"🌟",desc:"Overall, who's making this trip great"}
+];
+
+function openVoteModal(){
+  if(!myRiderName){promptForRiderName();if(!myRiderName){showToast("Set your name first");return;}}
+  if(riders.length<2){showToast("Add at least 2 riders to the roster first");return;}
+  let body="<div style='font-size:12px;color:var(--mist);margin-bottom:11px;'>Pick one rider per trait, or leave it blank to skip. Your individual picks are never shown to anyone — only the group totals.</div>";
+  for(let i=0;i<TRAIT_CATS.length;i++){
+    const t=TRAIT_CATS[i];
+    body+="<div style='margin-bottom:12px;'>";
+    body+="<div style='font-size:13px;color:var(--sand);margin-bottom:5px;'>"+t.icon+" "+t.key+"</div>";
+    body+="<div style='font-size:10px;color:var(--mist);margin-bottom:5px;'>"+t.desc+"</div>";
+    body+="<select id='vote_"+i+"' style='width:100%;padding:7px;border-radius:6px;background:var(--deep);border:1px solid var(--border);color:var(--snow);font-size:12px;'>";
+    body+="<option value=''>Skip this one</option>";
+    for(let j=0;j<riders.length;j++){
+      if(riders[j].name===myRiderName)continue;
+      body+="<option value='"+riders[j].name+"'>"+riders[j].name+"</option>";
+    }
+    body+="</select></div>";
   }
-  document.getElementById("leaderboard").innerHTML=html;
+  body+="<button class='btn bp' style='width:100%;' onclick='submitVotes()'>✅ Submit My Picks</button>";
+  openModal("🗳️ Rate Your Mates",body);
+}
+
+function submitVotes(){
+  let any=false;
+  for(let i=0;i<TRAIT_CATS.length;i++){
+    const sel=document.getElementById("vote_"+i);
+    if(!sel||!sel.value)continue;
+    any=true;
+    const payload={type:"vote",voter:myRiderName,category:TRAIT_CATS[i].key,ratee:sel.value};
+    if(BACKUP_URL){
+      fetch(BACKUP_URL,{method:"POST",body:JSON.stringify(payload)}).catch(function(){
+        syncQueue.push(payload);localStorage.setItem("mo_sync_queue",JSON.stringify(syncQueue));
+      });
+    }else{
+      syncQueue.push(payload);localStorage.setItem("mo_sync_queue",JSON.stringify(syncQueue));
+    }
+  }
+  document.getElementById("moverlay").classList.remove("open");
+  showToast(any?"Thanks for voting!":"No picks made, that's fine too");
+}
+
+function fetchTally(){
+  const el=document.getElementById("superlatives");
+  if(!BACKUP_URL){el.innerHTML="<div style='font-size:11px;color:var(--mist);'>Set a Backup Web App URL in the SOS tab to see group results.</div>";return;}
+  if(!navigator.onLine){el.innerHTML="<div style='font-size:11px;color:var(--mist);'>No internet — results need connectivity to fetch.</div>";return;}
+  el.innerHTML="<div style='font-size:11px;color:var(--mist);'>Loading results...</div>";
+  fetch(BACKUP_URL+"?action=tally")
+  .then(function(res){return res.json();})
+  .then(function(data){
+    if(!data.ok||!data.tally){el.innerHTML="<div style='font-size:11px;color:var(--mist);'>No votes yet — be the first!</div>";return;}
+    let html="";
+    for(let i=0;i<TRAIT_CATS.length;i++){
+      const t=TRAIT_CATS[i];
+      const cat=data.tally[t.key];
+      if(!cat||!Object.keys(cat).length){
+        html+="<div class='card' style='padding:9px;margin-bottom:6px;'><span style='font-size:12px;color:var(--mist);'>"+t.icon+" "+t.key+": no votes yet</span></div>";
+        continue;
+      }
+      let top=[],max=0;
+      for(const name in cat){if(cat[name]>max)max=cat[name];}
+      for(const name in cat){if(cat[name]===max)top.push(name);}
+      html+="<div class='card' style='padding:9px;margin-bottom:6px;'><span style='font-size:12px;color:var(--sand);'>"+t.icon+" "+t.key+":</span> <span style='font-size:13px;color:var(--snow);font-weight:600;'>"+top.join(" & ")+"</span> <span style='font-size:10px;color:var(--mist);'>("+max+" vote"+(max>1?"s":"")+")</span></div>";
+    }
+    el.innerHTML=html;
+  })
+  .catch(function(){el.innerHTML="<div style='font-size:11px;color:var(--mist);'>Could not load results. Try again later.</div>";});
 }
 const ACHS=[
   {i:"🏁",n:"First Wheel",d:"Log your first day",p:10,c:function(){return Object.keys(logs).length>=1;}},
@@ -1671,6 +1727,7 @@ function switchTab(tab){
   const tbtns=document.querySelectorAll(".tbtn");
   for(let i=0;i<tbtns.length;i++)tbtns[i].classList.remove("active");
   document.getElementById("panel-"+tab).classList.add("active");
+  if(tab==="fun")fetchTally();
   const tabs=["log","weather","memoir","route","mechanic","phrases","stats","tour","fun","checklist","emergency"];
   const i=tabs.indexOf(tab);
   if(i>=0)tbtns[i].classList.add("active");
@@ -1684,7 +1741,7 @@ function showToast(msg){
 function init(){
   buildTape();renderHero();loadForm();renderRouteList();renderMemoirEntries();
   buildSymGrid();buildSpares();buildPhrases();renderStats();
-  renderInsights();renderDayRatings();buildFuelStops();updateLB();
+  renderInsights();renderDayRatings();buildFuelStops();
   checkAch();buildCL();buildEmergency();newChallenge();renderTrivia();renderMPreview();
   updateBackupBadge();
   const urlInput=document.getElementById("backupUrlInput");
